@@ -1,0 +1,21 @@
+{
+    "name": "symmetry",
+    "description": "Sync remote Backbone.js models",
+    "author": "Stéphan Kochen <stephan@kochen.nl>",
+    "version": "0.1.0",
+    "homepage": "https://github.com/Two-Screen/symmetry",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Two-Screen/symmetry.git"
+    },
+    "dependencies": {
+        "backbone": "0.9",
+        "underscore": "1"
+    },
+    "devDependencies": {
+        "tap": "0.3"
+    },
+    "scripts": {
+        "test": "tap test.js"
+    }
+}
