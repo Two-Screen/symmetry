@@ -1,4 +1,4 @@
-## Symmetry.js
+## Symmetry.js [![Build Status](https://secure.travis-ci.org/Two-Screen/symmetry.png)](http://travis-ci.org/Two-Screen/symmetry)
 
 Dirt simple library to sync remote [Backbone.js] models and collections. Leaves
 the transport to you, but in return works almost anywhere (browser / node.js).
