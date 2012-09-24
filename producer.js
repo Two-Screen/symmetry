@@ -16,6 +16,20 @@ else {
     Symmetry = window.Symmetry;
 }
 
+// Helper to defer until the next tick. This is slightly different from
+// the `_.defer()` in Underscore.js.
+var defer;
+if (typeof(process) !== 'undefined') {
+    defer = function(callback, context) {
+        process.nextTick(callback.bind(context));
+    };
+}
+else {
+    defer = function(callback, context) {
+        _.defer(_.bind(callback, context));
+    };
+}
+
 // Producer is just another model. Attributes on the model should be set to the
 // other models and collections to synchronize. The producer will then trigger
 // 'message' events with JSON objects that can be sent to the consumer.
@@ -35,7 +49,7 @@ Symmetry.Producer = Backbone.Model.extend({
         var batch = this._batch;
         if (!batch) {
             batch = this._batch = [];
-            _.defer(this.flush, this);
+            defer(this.flush, this);
         }
         batch.push(ev);
     },
