@@ -30,6 +30,9 @@ Symmetry.Consumer = Backbone.Model.extend({
 
             // Look up the key.
             var value = this.get(key);
+            if (!value) {
+                return;
+            }
 
             // Handle the event.
             switch (name) {
@@ -38,6 +41,9 @@ Symmetry.Consumer = Backbone.Model.extend({
                     if (value.length !== undefined) {
                         var idAttribute = value.model.prototype.idAttribute;
                         value = value.get(arg[idAttribute]);
+                        if (!value) {
+                            return;
+                        }
                     }
 
                     value.set(arg, { symmetry: true });
