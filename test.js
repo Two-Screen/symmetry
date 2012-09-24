@@ -89,3 +89,32 @@ test('automatic flush', { timeout: 1000 }, function(t) {
     });
     model.set({ a: 5 });
 });
+
+// When a model is modified from within an `add` event handler installed
+// before the producers handler, the `change` arrives before the `add`.
+test('change from within add', function(t) {
+    t.plan(1);
+
+    var P_collection = new Backbone.Collection();
+    P_collection.on('add', function(model) {
+        model.set({ a: 5 });
+    });
+    var producer = new Symmetry.Producer({
+        foobar: P_collection
+    });
+
+    var C_collection = new Backbone.Collection();
+    var consumer = new Symmetry.Consumer({
+        foobar: C_collection
+    });
+
+    producer.on('message', function(message) {
+        consumer.message(message);
+    });
+
+    P_collection.add({ id: 1, a: 3 });
+    producer.flush();
+
+    var C_model = C_collection.get(1);
+    t.equal(C_model.get('a'), 5, 'must have the most recent value');
+});
