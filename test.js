@@ -77,3 +77,15 @@ test('basic usage', function(t) {
         "event batching", { lastMessage: lastMessage }
     );
 });
+
+test('automatic flush', { timeout: 1000 }, function(t) {
+    t.plan(1);
+
+    var model = new Backbone.Model({ id: 1, a: 3});
+    var producer = new Symmetry.Producer({ foobar: model });
+
+    producer.on('message', function(message) {
+        t.pass('should automatically flush');
+    });
+    model.set({ a: 5 });
+});
