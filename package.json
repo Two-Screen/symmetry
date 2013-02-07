@@ -1,0 +1,18 @@
+{
+    "name": "symmetry",
+    "description": "Sync objects by diffing and patching",
+    "author": "Stéphan Kochen <stephan@kochen.nl>",
+    "version": "0.2.0",
+    "homepage": "https://github.com/Two-Screen/symmetry",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Two-Screen/symmetry.git"
+    },
+    "keywords": ["diff", "patch", "sync"],
+    "devDependencies": {
+        "tape": "0.2"
+    },
+    "scripts": {
+        "test": "node ./test.js"
+    }
+}
