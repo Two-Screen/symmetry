@@ -11,7 +11,28 @@ else {
     Symmetry = window.Symmetry;
 }
 
-Symmetry.diff = diffValue;
+Symmetry.diff = function(left, right) {
+    left  = normalizeJson(left);
+    right = normalizeJson(right);
+    return diffValue(left, right);
+};
+
+// Fix up some JavaScript types and values that are not JSON.
+function normalizeJson(val) {
+    var type = typeof(val);
+
+    // Treat functions as undefined.
+    if (type === 'function')
+        return undefined;
+
+    // Special numbers serialize to null.
+    if (type === 'number') {
+        if (isNaN(val) || val === Infinity || val === -Infinity)
+            return null;
+    }
+
+    return val;
+}
 
 // Compare and return `none`, `reset` or a patch.
 function diffValue(left, right) {
@@ -53,12 +74,12 @@ function diffObject(left, right) {
 
     // Walk existing properties.
     for (key in left) {
-        valLeft = left[key];
-        valRight = right[key];
+        valLeft = normalizeJson(left[key]);
         if (valLeft === undefined)
             continue;
 
         numAttrs += 1;
+        valRight = normalizeJson(right[key]);
 
         // Attribute was removed.
         if (valRight === undefined) {
@@ -84,11 +105,11 @@ function diffObject(left, right) {
 
     // Find new properties.
     for (key in right) {
-        valLeft = left[key];
-        valRight = right[key];
+        valRight = normalizeJson(right[key]);
         if (valRight === undefined)
             continue;
 
+        valLeft = normalizeJson(left[key]);
         if (valLeft === undefined) {
             s[key] = valRight;
             numSets += 1;
@@ -124,7 +145,7 @@ function diffArray(left, right) {
     var lengths = new Array(size);
     var diffs = new Array(size);
 
-    var idx, idxLeft, idxRight, diff;
+    var idx, idxLeft, idxRight, valLeft, valRight, diff;
 
     // Add sentinels.
     for (idx = 0; idx < width; idx += 1)
@@ -138,7 +159,9 @@ function diffArray(left, right) {
         idx += 1;
         for (idxLeft = 0; idxLeft < lenLeft; idxLeft += 1) {
             // Diff and store result.
-            diff = diffValue(left[idxLeft], right[idxRight]);
+            valLeft = normalizeJson(left[idxLeft]);
+            valRight = normalizeJson(right[idxRight]);
+            diff = diffValue(valLeft, valRight);
             diffs[idx] = diff;
 
             // Treat exact matches, but also patches, as equal.
@@ -165,10 +188,11 @@ function diffArray(left, right) {
     idxRight = lenRight - 1;
     idx = size - 1;
 
+    var idxAfter;
     var current = [null, null];
     // Push the current left side onto the splice as a removed item.
     function removeItem() {
-        var idxAfter = idxLeft + 1;
+        idxAfter = idxLeft + 1;
         if (current[0] === idxAfter) {
             current[0] -= 1; current[1] += 1;
         }
@@ -179,12 +203,13 @@ function diffArray(left, right) {
     }
     // Push the current right side onto the splice as an added item.
     function addItem() {
-        var idxAfter = idxLeft + 1;
+        idxAfter = idxLeft + 1;
+        valRight = normalizeJson(right[idxRight]);
         if (current[0] === idxAfter) {
-            current.splice(2, 0, right[idxRight]);
+            current.splice(2, 0, valRight);
         }
         else {
-            s.push(current = [idxAfter, 0, right[idxRight]]);
+            s.push(current = [idxAfter, 0, valRight]);
         }
         idxRight -= 1; idx -= width;
     }

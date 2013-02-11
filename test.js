@@ -171,8 +171,7 @@ test('array diffs', function(t) {
 });
 
 test('undefined handling', function(t) {
-    iop(t, null, undefined, 'none',
-        'null vs undefined');
+    iop(t, null, undefined, 'none', 'null vs undefined');
 
     iop(t,
         {a:3, b:undefined},
@@ -196,5 +195,40 @@ test('undefined handling', function(t) {
         'none',
         'treat array item as if null (right)');
 
+    t.end();
+});
+
+test('function handling', function(t) {
+    iop(t, function() {}, undefined, 'none', 'function vs null');
+
+    iop(t,
+        {a:3, b:function() {}},
+        {a:3},
+        'none',
+        'treat attribute as if non-existant (left)');
+    iop(t,
+        {a:3},
+        {a:3, b:function() {}},
+        'none',
+        'treat attribute as if non-existant (right)');
+
+    iop(t,
+        [3, function() {}, 5],
+        [3, null, 5],
+        'none',
+        'treat array item as if null (left)');
+    iop(t,
+        [3, null, 5],
+        [3, function() {}, 5],
+        'none',
+        'treat array item as if null (right)');
+
+    t.end();
+});
+
+test('special number handling', function(t) {
+    iop(t, NaN, null, 'none', 'NaN vs null');
+    iop(t, Infinity, null, 'none', 'Infinity vs null');
+    iop(t, -Infinity, null, 'none', '-Infinity vs null');
     t.end();
 });
