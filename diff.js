@@ -1,7 +1,8 @@
 (function() {
 "use strict";
-/*global require, exports, window */
+/*global exports, window */
 
+// Get the exports object.
 var Symmetry;
 if (typeof(exports) !== 'undefined') {
     Symmetry = exports;
@@ -11,14 +12,9 @@ else {
     Symmetry = window.Symmetry;
 }
 
-Symmetry.diff = function(left, right) {
-    left  = normalizeJson(left);
-    right = normalizeJson(right);
-    return diffValue(left, right);
-};
-
-// Fix up some JavaScript types and values that are not JSON.
-function normalizeJson(val) {
+// Fix up some JavaScript types and values that are not JSON. This may still
+// return undefined to signal the value is normally not serialized at all.
+var normalizeJson = Symmetry.normalizeJson = function(val) {
     var type = typeof(val);
 
     // Treat functions as undefined.
@@ -32,10 +28,17 @@ function normalizeJson(val) {
     }
 
     return val;
-}
+};
 
-// Compare and return `none`, `reset` or a patch.
-function diffValue(left, right) {
+// Compare any two values and return `none`, `reset` or a patch.
+Symmetry.diff = function(left, right) {
+    left  = normalizeJson(left);
+    right = normalizeJson(right);
+    return diffValue(left, right);
+};
+
+// Compare any two values. Values passed in should already be normalized.
+var diffValue = Symmetry.diffValue = function(left, right) {
     // Treat undefined as null.
     if (left  === undefined) left  = null;
     if (right === undefined) right = null;
@@ -60,14 +63,14 @@ function diffValue(left, right) {
 
     // Reset everything else.
     return 'reset';
-}
+};
 
-// Patch objects generated have:
+// Compare two objects. Patches generated have:
 //  - `t` is always 'o'.
 //  - `r` is a set of keys removed.
 //  - `s` is a map of keys to new values.
 //  - `p` is a map of keys to more specific patches.
-function diffObject(left, right) {
+var diffObject = Symmetry.diffObject = function(left, right) {
     var r = [], s = {}, p = {};
     var key, valLeft, valRight;
     var numAttrs = 0, numSets = 0, numPatches = 0;
@@ -125,15 +128,15 @@ function diffObject(left, right) {
         return 'none';
     else
         return res;
-}
+};
 
-// Patch objects generated have:
+// Compare two arrays. Patches generated have:
 //  - `t` is always 'a'.
 //  - `p` is a map of indices to more specific patches.
 //    These reference original indices, and should be applied first.
 //  - `s` is a list of splices, each an array of `splice()` arguments.
 //    These are in reverse order, so they can be applied as specified.
-function diffArray(left, right) {
+var diffArray = Symmetry.diffArray = function(left, right) {
     var lenLeft = left.length;
     var lenRight = right.length;
 
@@ -253,6 +256,6 @@ function diffArray(left, right) {
         return 'none';
     else
         return res;
-}
+};
 
 })();

@@ -1,7 +1,8 @@
 (function() {
 "use strict";
-/*global require, exports, window */
+/*global exports, window */
 
+// Get the exports object.
 var Symmetry;
 if (typeof(exports) !== 'undefined') {
     Symmetry = exports;
@@ -11,20 +12,23 @@ else {
     Symmetry = window.Symmetry;
 }
 
-Symmetry.patch = patchValue;
+// Apply an object or array patch in-place.
+Symmetry.patch = function(val, patch) {
+    patchValue(val, patch);
+};
 
-// Apply a patch to an object in-place.
-function patchValue(val, patch) {
+// Apply a patch based on its type.
+var patchValue = Symmetry.patchValue = function(val, patch) {
     if (patch.t === 'o')
         patchObject(val, patch);
     else if (patch.t === 'a')
         patchArray(val, patch);
     else
         throw new Error("Invalid patch");
-}
+};
 
-// Accepts patches with `t:'o'`.
-function patchObject(obj, patch) {
+// Apply an object patch. (`t:'o'`)
+var patchObject = Symmetry.patchObject = function(obj, patch) {
     var i, key;
 
     var r = patch.r;
@@ -49,10 +53,10 @@ function patchObject(obj, patch) {
             patchValue(obj[key], p[key]);
         }
     }
-}
+};
 
-// Accepts patches with `t:'a'`.
-function patchArray(arr, patch) {
+// Apply an array patch. (`t:'a'`)
+var patchArray = Symmetry.patchArray = function(arr, patch) {
     var i, idx;
 
     var p = patch.p;
@@ -69,6 +73,6 @@ function patchArray(arr, patch) {
             arr.splice.apply(arr, s[i]);
         }
     }
-}
+};
 
 })();
