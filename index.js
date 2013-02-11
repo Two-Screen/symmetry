@@ -1,5 +1,6 @@
 var diff = require('./diff');
 var patch = require('./patch');
+var scope = require('./scope');
 
 module.exports = {
     normalizeJson: diff.normalizeJson,
@@ -11,5 +12,9 @@ module.exports = {
     patch: patch.patch,
     patchValue: patch.patchValue,
     patchObject: patch.patchObject,
-    patchArray: patch.patchArray
+    patchArray: patch.patchArray,
+
+    cloneJson: scope.cloneJson,
+    scopeFilter: scope.scopeFilter,
+    scope: scope.scope
 };

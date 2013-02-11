@@ -232,3 +232,29 @@ test('special number handling', function(t) {
     iop(t, -Infinity, null, 'none', '-Infinity vs null');
     t.end();
 });
+
+test('scope', function(t) {
+    var scope = sym.scope();
+
+    scope.foo = 5;
+    t.deepEqual(scope.$digest(), 'reset',
+        'digest after first set');
+
+    scope.bar = 8;
+    t.deepEqual(scope.$digest(), {t:'o',s:{bar:8}},
+        'digest after next set');
+
+    scope.baz = 11;
+    scope.$clear();
+    t.deepEqual(scope.$digest(), 'none',
+        'digest after set and clear');
+
+    t.deepEqual(scope.$digest(), 'none',
+        'digest with no changes');
+
+    scope.$test = 13;
+    t.deepEqual(scope.$digest(), 'none',
+        'digest after set $-property');
+
+    t.end();
+});
