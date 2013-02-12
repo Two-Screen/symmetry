@@ -15,6 +15,8 @@ module.exports = {
     patchArray: patch.patchArray,
 
     cloneJson: scope.cloneJson,
+    cloneJsonObject: scope.cloneJsonObject,
+    cloneJsonArray: scope.cloneJsonArray,
     scopeFilter: scope.scopeFilter,
     scope: scope.scope
 };

@@ -18,35 +18,37 @@ else {
 var cloneJson = Symmetry.cloneJson = function(val, options) {
     if (!val || typeof(val) !== 'object')
         return val;
+    else if (Array.isArray(val))
+        return cloneJsonArray(val, options);
+    else
+        return cloneJsonObject(val, options);
+};
 
-    var clone;
-
-    if (Array.isArray(val)) {
-        var length = val.length;
-
-        clone = new Array(length);
-        for (var i = 0; i < length; i++) {
-            var itemVal = diff.normalizeJson(val[i]);
-            if (itemVal === undefined)
-                clone[i] = null;
-            else
-                clone[i] = cloneJson(attrVal);
-        }
+// Create a deep clone of normalized JSON values of an object.
+var cloneJsonObject = Symmetry.cloneJsonObject = function(obj, options) {
+    var clone = {};
+    var filter = options && options.filter;
+    for (var key in obj) {
+        var attrVal = diff.normalizeJson(obj[key]);
+        if (filter)
+            attrVal = filter(attrVal, key);
+        if (attrVal !== undefined)
+            clone[key] = cloneJson(attrVal);
     }
-    else {
-        var filter = options && options.filter;
-
-        clone = {};
-        for (var key in val) {
-            var attrVal = diff.normalizeJson(val[key]);
-            if (filter)
-                attrVal = filter(attrVal, key);
-            if (attrVal !== undefined)
-                clone[key] = cloneJson(attrVal);
-        }
-    }
-
     return clone;
+};
+
+// Create a deep clone of normalized JSON values of an array.
+var cloneJsonArray = Symmetry.cloneJsonArray = function(arr, options) {
+    var clone = new Array(length);
+    var length = arr.length;
+    for (var i = 0; i < length; i++) {
+        var itemVal = diff.normalizeJson(arr[i]);
+        if (itemVal === undefined)
+            clone[i] = null;
+        else
+            clone[i] = cloneJson(itemVal);
+    }
 };
 
 // The default filter for scope object.
