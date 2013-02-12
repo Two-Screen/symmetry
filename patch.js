@@ -14,21 +14,21 @@ else {
 
 // Apply an object or array patch in-place.
 Symmetry.patch = function(val, patch) {
-    patchValue(val, patch);
+    this.patchValue(val, patch);
 };
 
 // Apply a patch based on its type.
-var patchValue = Symmetry.patchValue = function(val, patch) {
+Symmetry.patchValue = function(val, patch) {
     if (patch.t === 'o')
-        patchObject(val, patch);
+        this.patchObject(val, patch);
     else if (patch.t === 'a')
-        patchArray(val, patch);
+        this.patchArray(val, patch);
     else
         throw new Error("Invalid patch");
 };
 
 // Apply an object patch. (`t:'o'`)
-var patchObject = Symmetry.patchObject = function(obj, patch) {
+Symmetry.patchObject = function(obj, patch) {
     var i, key;
 
     var r = patch.r;
@@ -50,19 +50,19 @@ var patchObject = Symmetry.patchObject = function(obj, patch) {
     var p = patch.p;
     if (p) {
         for (key in p) {
-            patchValue(obj[key], p[key]);
+            this.patchValue(obj[key], p[key]);
         }
     }
 };
 
 // Apply an array patch. (`t:'a'`)
-var patchArray = Symmetry.patchArray = function(arr, patch) {
+Symmetry.patchArray = function(arr, patch) {
     var i, idx;
 
     var p = patch.p;
     if (p) {
         for (idx in p) {
-            patchValue(arr[idx], p[idx]);
+            this.patchValue(arr[idx], p[idx]);
         }
     }
 
