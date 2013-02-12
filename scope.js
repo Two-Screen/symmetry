@@ -63,16 +63,23 @@ var scopeFilter = Symmetry.scopeFilter = function(val, key) {
 
 // An object that tracks modifications to itself. After making changes,
 // call `$digest` to get a patch, or `$clear` to discard them.
-var Scope = Symmetry.scope = function(options) {
+var Scope = Symmetry.scope = function(init, options) {
     if (!(this instanceof Scope))
-        return new Scope(options);
+        return new Scope(init, options);
+
     if (!options)
         options = {};
     if (!options.filter)
         options.filter = scopeFilter;
-
-    this.$last = {};
     this.$options = options;
+
+    for (var key in init) {
+        var val = init[key];
+        if (val !== undefined)
+            this[key] = val;
+    }
+
+    this.$clear();
 };
 
 // Create a digest of all changes.
