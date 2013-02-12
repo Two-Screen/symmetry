@@ -15,6 +15,12 @@ else {
 // Create a deep clone of normalized JSON values.
 // Optionally takes a `filter(value, key)` function.
 Symmetry.cloneJson = function(val, options) {
+    val = this.normalizeJson(val);
+    return this.cloneJsonValue(val, options);
+};
+
+// Create a deep clone of any value.
+Symmetry.cloneJsonValue = function(val, options) {
     if (!val || typeof(val) !== 'object')
         return val;
     else if (Array.isArray(val))
@@ -23,7 +29,7 @@ Symmetry.cloneJson = function(val, options) {
         return this.cloneJsonObject(val, options);
 };
 
-// Create a deep clone of normalized JSON values of an object.
+// Create a deep clone of an object.
 Symmetry.cloneJsonObject = function(obj, options) {
     var clone = {};
     var filter = options && options.filter;
@@ -32,12 +38,12 @@ Symmetry.cloneJsonObject = function(obj, options) {
         if (filter)
             attrVal = filter(attrVal, key);
         if (attrVal !== undefined)
-            clone[key] = this.cloneJson(attrVal);
+            clone[key] = this.cloneJsonValue(attrVal);
     }
     return clone;
 };
 
-// Create a deep clone of normalized JSON values of an array.
+// Create a deep clone of an array.
 Symmetry.cloneJsonArray = function(arr, options) {
     var clone = new Array(length);
     var length = arr.length;
@@ -46,7 +52,7 @@ Symmetry.cloneJsonArray = function(arr, options) {
         if (itemVal === undefined)
             clone[i] = null;
         else
-            clone[i] = this.cloneJson(itemVal);
+            clone[i] = this.cloneJsonValue(itemVal);
     }
     return clone;
 };
