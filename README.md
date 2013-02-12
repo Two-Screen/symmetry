@@ -40,6 +40,8 @@ Can diff anything that can be represented as JSON:
     scope.people.get(2).set('age', 35);
     scope.$digest();  # => { t: 'o', p: { people: { t: 'a', /* ... */ } } }
 
+[MIT-licensed](http://en.wikipedia.org/wiki/MIT_license)
+
 ### Installing
 
 In node.js, install using NPM:
