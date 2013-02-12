@@ -46,7 +46,8 @@ In node.js, install using NPM:
 
     npm install symmetry
 
-In the browser, simply include `diff.js` or `patch.js`.
+In the browser, simply include `diff.js`, `patch.js` or `scope.js`. (Note that
+`scope.js` requires `diff.js`.)
 
 ### Hacking the code
 
