@@ -1,15 +1,16 @@
 var test = require('tape');
-var sym = require('./');
+var Backbone = require('backbone');
+var Symmetry = require('./');
 
 // Verify all of a given input, output and patch.
 function iop(t, i, o, p, message) {
     var diffOnly = typeof(p) !== 'object';
 
-    var res = sym.diff(i, o);
+    var res = Symmetry.diff(i, o);
     t.deepEqual(res, p, message + (diffOnly ? '' : ' (verify diff)'));
 
     if (!diffOnly) {
-        sym.patch(i, p);
+        Symmetry.patch(i, p);
         t.deepEqual(i, o, message + ' (verify patch)');
     }
 }
@@ -252,7 +253,7 @@ test('using toJSON method', function(t) {
 });
 
 test('scope', function(t) {
-    var scope = sym.scope();
+    var scope = Symmetry.scope();
 
     scope.foo = 5;
     t.deepEqual(scope.$digest(), 'reset',
@@ -273,6 +274,60 @@ test('scope', function(t) {
     scope.$test = 13;
     t.deepEqual(scope.$digest(), 'none',
         'digest after set $-property');
+
+    t.end();
+});
+
+test('examples', function(t) {
+    var a, b, obj, diff, scope, people, result, expect;
+
+    a = { x: 3, y: 5, z: 1 };
+    b = { x: 3, y: 8, z: 1 };
+    result = Symmetry.diff(a, b);
+    expect = { t: 'o', s: { y: 8 } };
+    t.deepEqual(result, expect, 'object diff');
+
+    a = ['one', 'two', 'three'];
+    b = ['one', 'two', 'two and a half'];
+    result = Symmetry.diff(a, b);
+    expect = { t: 'a', s: [ [2, 1, 'two and a half'] ] };
+    t.deepEqual(result, expect, 'array diff');
+
+    obj  = { x: 3, y: 5, z: 1 };
+    diff = { t: 'o', s: { y: 8 } };
+    Symmetry.patch(obj, diff);
+    result = obj;
+    expect = { x: 3, y: 8, z: 1 };
+    t.deepEqual(result, expect, 'object patch');
+
+    scope = Symmetry.scope({ x: 3, y: 5, z: 1 });
+
+    scope.y = 8;
+    result = scope.$digest();
+    expect = { t: 'o', s: { y: 8 } };
+    t.deepEqual(result, expect, 'digest 1');
+
+    scope.x = 7;
+    scope.z = 2;
+    result = scope.$digest();
+    expect = { t: 'o', s: { x: 7, z: 2 } };
+    t.deepEqual(result, expect, 'digest 2');
+
+    people = new Backbone.Collection([
+        { id: 1, name: 'John', age: 30 },
+        { id: 2, name: 'Dave', age: 34 }
+    ]);
+    scope = Symmetry.scope({ people: people });
+
+    scope.people.add({ id: 3, name: 'Mark', age: 27 });
+    scope.people.get(2).set('age', 35);
+    result = scope.$digest();
+    expect = { t: 'o', p: { people: {
+        t: 'a',
+        p: { 1: { t: 'o', s: { age: 35 } } },
+        s: [ [ 2, 0, { id: 3, name: 'Mark', age: 27 } ] ]
+    } } };
+    t.deepEqual(result, expect, 'toJSON');
 
     t.end();
 });
