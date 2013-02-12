@@ -233,6 +233,24 @@ test('special number handling', function(t) {
     t.end();
 });
 
+test('using toJSON method', function(t) {
+    var val;
+
+    val = {};
+    val.toJSON = function() { return 'foo'; };
+    iop(t, val, 'foo', 'none', 'toJSON on an object');
+
+    val = [];
+    val.toJSON = function() { return 'foo'; };
+    iop(t, val, 'foo', 'none', 'toJSON on an array');
+
+    val = function() {};
+    val.toJSON = function() { return 'foo'; };
+    iop(t, val, 'foo', 'none', 'toJSON on a function');
+
+    t.end();
+});
+
 test('scope', function(t) {
     var scope = sym.scope();
 

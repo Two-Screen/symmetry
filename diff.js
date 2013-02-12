@@ -15,6 +15,9 @@ else {
 // Fix up some JavaScript types and values that are not JSON. This may still
 // return undefined to signal the value is normally not serialized at all.
 var normalizeJson = Symmetry.normalizeJson = function(val) {
+    if (val && val.toJSON)
+        val = val.toJSON();
+
     var type = typeof(val);
 
     // Treat functions as undefined.
