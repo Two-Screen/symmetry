@@ -48,6 +48,7 @@ Symmetry.cloneJsonArray = function(arr, options) {
         else
             clone[i] = this.cloneJson(itemVal);
     }
+    return clone;
 };
 
 // The default filter for scope object.
