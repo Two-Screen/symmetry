@@ -14,9 +14,9 @@ else {
 
 // Fix up some JavaScript types and values that are not JSON. This may still
 // return undefined to signal the value is normally not serialized at all.
-Symmetry.normalizeJson = function(val) {
+Symmetry.normalizeJson = function(val, options) {
     if (val && val.toJSON)
-        val = val.toJSON();
+        val = val.toJSON(options || { symmetry: true });
 
     var type = typeof(val);
 
@@ -34,14 +34,14 @@ Symmetry.normalizeJson = function(val) {
 };
 
 // Compare any two values and return `none`, `reset` or a patch.
-Symmetry.diff = function(left, right) {
-    left  = this.normalizeJson(left);
-    right = this.normalizeJson(right);
-    return this.diffValue(left, right);
+Symmetry.diff = function(left, right, options) {
+    left  = this.normalizeJson(left, options);
+    right = this.normalizeJson(right, options);
+    return this.diffValue(left, right, options);
 };
 
 // Compare any two values. Values passed in should already be normalized.
-Symmetry.diffValue = function(left, right) {
+Symmetry.diffValue = function(left, right, options) {
     // Treat undefined as null.
     if (left  === undefined) left  = null;
     if (right === undefined) right = null;
@@ -55,13 +55,13 @@ Symmetry.diffValue = function(left, right) {
         var leftIsArray  = Array.isArray(left);
         var rightIsArray = Array.isArray(right);
         if (leftIsArray && rightIsArray)
-            return this.diffArray(left, right);
+            return this.diffArray(left, right, options);
 
         // Descend into two regular objects.
         var leftIsObject  = typeof(left)  === 'object' && !leftIsArray;
         var rightIsObject = typeof(right) === 'object' && !rightIsArray;
         if (leftIsObject && rightIsObject)
-            return this.diffObject(left, right);
+            return this.diffObject(left, right, options);
     }
 
     // Reset everything else.
@@ -73,19 +73,19 @@ Symmetry.diffValue = function(left, right) {
 //  - `r` is a set of keys removed.
 //  - `s` is a map of keys to new values.
 //  - `p` is a map of keys to more specific patches.
-Symmetry.diffObject = function(left, right) {
+Symmetry.diffObject = function(left, right, options) {
     var r = [], s = {}, p = {};
     var key, valLeft, valRight;
     var numAttrs = 0, numSets = 0, numPatches = 0;
 
     // Walk existing properties.
     for (key in left) {
-        valLeft = this.normalizeJson(left[key]);
+        valLeft = this.normalizeJson(left[key], options);
         if (valLeft === undefined)
             continue;
 
         numAttrs += 1;
-        valRight = this.normalizeJson(right[key]);
+        valRight = this.normalizeJson(right[key], options);
 
         // Attribute was removed.
         if (valRight === undefined) {
@@ -94,7 +94,7 @@ Symmetry.diffObject = function(left, right) {
         }
 
         // Diff and merge the resulting patch.
-        var patch = this.diffValue(valLeft, valRight);
+        var patch = this.diffValue(valLeft, valRight, options);
         if (patch === 'reset') {
             s[key] = valRight;
             numSets += 1;
@@ -111,11 +111,11 @@ Symmetry.diffObject = function(left, right) {
 
     // Find new properties.
     for (key in right) {
-        valRight = this.normalizeJson(right[key]);
+        valRight = this.normalizeJson(right[key], options);
         if (valRight === undefined)
             continue;
 
-        valLeft = this.normalizeJson(left[key]);
+        valLeft = this.normalizeJson(left[key], options);
         if (valLeft === undefined) {
             s[key] = valRight;
             numSets += 1;
@@ -139,7 +139,7 @@ Symmetry.diffObject = function(left, right) {
 //    These reference original indices, and should be applied first.
 //  - `s` is a list of splices, each an array of `splice()` arguments.
 //    These are in reverse order, so they can be applied as specified.
-Symmetry.diffArray = function(left, right) {
+Symmetry.diffArray = function(left, right, options) {
     var self = this;
 
     var lenLeft = left.length;
@@ -167,9 +167,9 @@ Symmetry.diffArray = function(left, right) {
         idx += 1;
         for (idxLeft = 0; idxLeft < lenLeft; idxLeft += 1) {
             // Diff and store result.
-            valLeft = this.normalizeJson(left[idxLeft]);
-            valRight = this.normalizeJson(right[idxRight]);
-            diff = this.diffValue(valLeft, valRight);
+            valLeft  = this.normalizeJson(left[idxLeft], options);
+            valRight = this.normalizeJson(right[idxRight], options);
+            diff = this.diffValue(valLeft, valRight, options);
             diffs[idx] = diff;
 
             // Treat exact matches, but also patches, as equal.
@@ -212,7 +212,7 @@ Symmetry.diffArray = function(left, right) {
     // Push the current right side onto the splice as an added item.
     function addItem() {
         idxAfter = idxLeft + 1;
-        valRight = self.normalizeJson(right[idxRight]);
+        valRight = self.normalizeJson(right[idxRight], options);
         if (current[0] === idxAfter) {
             current.splice(2, 0, valRight);
         }

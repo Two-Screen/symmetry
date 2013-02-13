@@ -236,6 +236,7 @@ test('special number handling', function(t) {
 
 test('using toJSON method', function(t) {
     var val;
+    t.plan(5);
 
     val = {};
     val.toJSON = function() { return 'foo'; };
@@ -248,6 +249,19 @@ test('using toJSON method', function(t) {
     val = function() {};
     val.toJSON = function() { return 'foo'; };
     iop(t, val, 'foo', 'none', 'toJSON on a function');
+
+    val.toJSON = function(options) {
+        t.ok(options.symmetry, 'symmetry option set in toJSON');
+        return 'foo';
+    };
+    Symmetry.diff(val, 'foo');
+
+    var customOptions = {};
+    val.toJSON = function(options) {
+        t.equal(options, customOptions, 'custom options to toJSON');
+        return 'foo';
+    };
+    Symmetry.diff(val, 'foo', customOptions);
 
     t.end();
 });
