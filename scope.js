@@ -15,7 +15,7 @@ else {
 // Create a deep clone of normalized JSON values.
 // Optionally takes a `filter(value, key)` function.
 Symmetry.cloneJson = function(val, options) {
-    val = this.normalizeJson(val);
+    val = this.normalizeJson(val, options);
     return this.cloneJsonValue(val, options);
 };
 
@@ -34,11 +34,11 @@ Symmetry.cloneJsonObject = function(obj, options) {
     var clone = {};
     var filter = options && options.filter;
     for (var key in obj) {
-        var attrVal = this.normalizeJson(obj[key]);
+        var attrVal = this.normalizeJson(obj[key], options);
         if (filter)
             attrVal = filter(attrVal, key);
         if (attrVal !== undefined)
-            clone[key] = this.cloneJsonValue(attrVal);
+            clone[key] = this.cloneJsonValue(attrVal, options);
     }
     return clone;
 };
@@ -48,11 +48,11 @@ Symmetry.cloneJsonArray = function(arr, options) {
     var clone = new Array(length);
     var length = arr.length;
     for (var i = 0; i < length; i++) {
-        var itemVal = this.normalizeJson(arr[i]);
+        var itemVal = this.normalizeJson(arr[i], options);
         if (itemVal === undefined)
             clone[i] = null;
         else
-            clone[i] = this.cloneJsonValue(itemVal);
+            clone[i] = this.cloneJsonValue(itemVal, options);
     }
     return clone;
 };
@@ -74,15 +74,17 @@ var Scope = Symmetry.scope = function(init, options) {
         return new Scope(init, options);
 
     if (!options)
-        options = {};
+        options = { symmetry: true };
     if (!options.filter)
         options.filter = scopeFilter;
     this.$options = options;
 
-    for (var key in init) {
-        var val = init[key];
-        if (val !== undefined)
-            this[key] = val;
+    if (init) {
+        for (var key in init) {
+            var val = init[key];
+            if (val !== undefined)
+                this[key] = val;
+        }
     }
 
     this.$clear();
@@ -91,7 +93,7 @@ var Scope = Symmetry.scope = function(init, options) {
 // Create a digest of all changes.
 Scope.prototype.$digest = function() {
     var current = Symmetry.cloneJson(this, this.$options);
-    var result = Symmetry.diffObject(this.$last, current);
+    var result = Symmetry.diffObject(this.$last, current, this.$options);
     this.$last = current;
     return result;
 };

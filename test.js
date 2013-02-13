@@ -267,7 +267,8 @@ test('using toJSON method', function(t) {
 });
 
 test('scope', function(t) {
-    var scope = Symmetry.scope();
+    t.plan(6);
+    var scope = Symmetry.scope(null, { something: true });
 
     scope.foo = 5;
     t.deepEqual(scope.$digest(), 'reset',
@@ -288,6 +289,12 @@ test('scope', function(t) {
     scope.$test = 13;
     t.deepEqual(scope.$digest(), 'none',
         'digest after set $-property');
+
+    scope.obj = { toJSON: function(options) {
+        t.ok(options.something, 'options passed to toJSON');
+        return 'foo';
+    } };
+    scope.$digest();
 
     t.end();
 });
