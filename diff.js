@@ -106,7 +106,7 @@ Symmetry.diffObject = function(left, right, options) {
     }
 
     // No partial changes, tell parent we should be reset.
-    if (r.length + numSets === numAttrs)
+    if (numAttrs && r.length + numSets === numAttrs)
         return 'reset';
 
     // Find new properties.
@@ -115,6 +115,11 @@ Symmetry.diffObject = function(left, right, options) {
         if (valRight === undefined)
             continue;
 
+        // Attributes was added to an empty object.
+        if (numAttrs === 0)
+            return 'reset';
+
+        // Attribute was added.
         valLeft = this.normalizeJson(left[key], options);
         if (valLeft === undefined) {
             s[key] = valRight;

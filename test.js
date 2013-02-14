@@ -299,6 +299,23 @@ test('scope', function(t) {
     t.end();
 });
 
+test('empty objects', function(t) {
+    var scope = Symmetry.scope({
+        object: {},
+        array: []
+    });
+    t.equal(Object.keys(scope.$last.object).length, 0, 'clone empty object');
+    t.equal(scope.$last.array.length, 0, 'clone empty array');
+
+    scope.object = {};
+    t.equal(scope.$digest(), 'none', 'diff empty object');
+
+    scope.array = [];
+    t.equal(scope.$digest(), 'none', 'diff empty array');
+
+    t.end();
+});
+
 test('examples', function(t) {
     var a, b, obj, diff, scope, people, result, expect;
 

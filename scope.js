@@ -45,8 +45,8 @@ Symmetry.cloneJsonObject = function(obj, options) {
 
 // Create a deep clone of an array.
 Symmetry.cloneJsonArray = function(arr, options) {
-    var clone = new Array(length);
     var length = arr.length;
+    var clone = new Array(length);
     for (var i = 0; i < length; i++) {
         var itemVal = this.normalizeJson(arr[i], options);
         if (itemVal === undefined)
