@@ -100,25 +100,52 @@ test('object diffs', function(t) {
 
 test('array diffs', function(t) {
     iop(t,
-        [3, 5],
+        [3, 5, 8],
+        [4, 5, 8],
+        {t:'a', s:[[0, 1, 4]]},
+        'change an item at the start');
+    iop(t,
+        [5, 8],
+        [3, 5, 8],
+        {t:'a', s:[[0, 0, 3]]},
+        'insert an item at the start');
+    iop(t,
+        [3, 5, 8],
+        [5, 8],
+        {t:'a', s:[[0, 1]]},
+        'remove an item from the start');
+
+    iop(t,
+        [3, 5, 8],
+        [3, 6, 8],
+        {t:'a', s:[[1, 1, 6]]},
+        'change an item in the middle');
+    iop(t,
         [3, 8],
-        {t:'a', s:[[1, 1, 8]]},
-        'change an item');
+        [3, 5, 8],
+        {t:'a', s:[[1, 0, 5]]},
+        'insert an item in the middle');
+    iop(t,
+        [3, 5, 8],
+        [3, 8],
+        {t:'a', s:[[1, 1]]},
+        'remove an item from the middle');
+
+    iop(t,
+        [3, 5, 8],
+        [3, 5, 9],
+        {t:'a', s:[[2, 1, 9]]},
+        'change an item at the end');
     iop(t,
         [3, 5],
         [3, 5, 8],
         {t:'a', s:[[2, 0, 8]]},
-        'append an item');
+        'insert an item at the end');
     iop(t,
+        [3, 5, 8],
         [3, 5],
-        [3, 8, 5],
-        {t:'a', s:[[1, 0, 8]]},
-        'insert an item');
-    iop(t,
-        [3, 5],
-        [3],
-        {t:'a', s:[[1, 1]]},
-        'remove an item');
+        {t:'a', s:[[2, 1]]},
+        'remove an item from the end');
 
     iop(t,
         [2, 3, 4],

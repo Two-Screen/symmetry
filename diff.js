@@ -149,33 +149,94 @@ Symmetry.diffArray = function(left, right, options) {
 
     var lenLeft = left.length;
     var lenRight = right.length;
+    var valLeft, valRight, idx, slice;
 
-    // Build a table of longest common subsequence lengths.
-    var width = lenLeft + 1;
-    var height = lenRight + 1;
+    // Reduce the problem by trimming exact matches at the start.
+    var start, firstDiff;
+    for (start = 0; start < lenLeft && start < lenRight; start += 1) {
+        valLeft  = this.normalizeJson(left[start], options);
+        valRight = this.normalizeJson(right[start], options);
+        firstDiff = this.diffValue(valLeft, valRight, options);
+        if (firstDiff !== 'none')
+            break;
+    }
+
+    // Short-circuit for exact matches, pushes and pops.
+    if (start === lenLeft) {
+        if (start === lenRight)
+            return 'none';
+
+        slice = new Array(2 + lenRight - start);
+        slice[0] = lenLeft;
+        slice[1] = 0;
+        for (idx = 2; start < lenRight; start += 1, idx += 1) {
+            slice[idx] = this.normalizeJson(right[start], options);
+        }
+        return {t:'a', s:[slice]};
+    }
+    else if (start === lenRight) {
+        slice = [start, lenLeft - start];
+        return {t:'a', s:[slice]};
+    }
+
+    // Reduce further by trimming exact matches at the end.
+    var endLeft = lenLeft - 1;
+    var endRight = lenRight - 1;
+    var lastDiff;
+    while (endLeft >= start && endRight >= start) {
+        valLeft  = this.normalizeJson(left[endLeft], options);
+        valRight = this.normalizeJson(right[endRight], options);
+        lastDiff = this.diffValue(valLeft, valRight, options);
+        if (lastDiff !== 'none')
+            break;
+        endLeft -= 1;
+        endRight -= 1;
+    }
+
+    // Short-circuit for a single block of inserts or removes.
+    if (endLeft < start) {
+        slice = new Array(2 + endRight - start + 1);
+        slice[0] = start;
+        slice[1] = 0;
+        for (idx = 2; start <= endRight; start += 1, idx += 1) {
+            slice[idx] = this.normalizeJson(right[start], options);
+        }
+        return {t:'a', s:[slice]};
+    }
+    else if (endRight < start) {
+        slice = [start, endLeft - start + 1];
+        return {t:'a', s:[slice]};
+    }
+
+    // For the remainder, build a table of diffs, and a table of LCS lengths.
+    var width = 1 + endLeft - start + 1;
+    var height = 1 + endRight - start + 1;
     var diag = width + 1;
     var size = width * height;
     var lengths = new Array(size);
     var diffs = new Array(size);
-
-    var idx, idxLeft, idxRight, valLeft, valRight, diff;
+    var idxLeft, idxRight, diff;
 
     // Add sentinels.
     for (idx = 0; idx < width; idx += 1)
         lengths[idx] = 0;
     for (idx = 0; idx < size; idx += width)
         lengths[idx] = 0;
+    // We already calculated these.
+    diffs[diag] = firstDiff;
+    diffs[size - 1] = lastDiff;
 
     // Skip across sentinels.
     idx = width;
-    for (idxRight = 0; idxRight < lenRight; idxRight += 1) {
+    for (idxRight = start; idxRight <= endRight; idxRight += 1) {
         idx += 1;
-        for (idxLeft = 0; idxLeft < lenLeft; idxLeft += 1) {
+        for (idxLeft = start; idxLeft <= endLeft; idxLeft += 1) {
             // Diff and store result.
-            valLeft  = this.normalizeJson(left[idxLeft], options);
-            valRight = this.normalizeJson(right[idxRight], options);
-            diff = this.diffValue(valLeft, valRight, options);
-            diffs[idx] = diff;
+            if (!(diff = diffs[idx])) {
+                valLeft  = this.normalizeJson(left[idxLeft], options);
+                valRight = this.normalizeJson(right[idxRight], options);
+                diff = diffs[idx] = this.diffValue(valLeft, valRight, options);
+            }
 
             // Treat exact matches, but also patches, as equal.
             if (diff !== 'reset') {
@@ -197,8 +258,8 @@ Symmetry.diffArray = function(left, right, options) {
     var p = {};
     var s = [];
 
-    idxLeft = lenLeft - 1;
-    idxRight = lenRight - 1;
+    idxLeft = endLeft;
+    idxRight = endRight;
     idx = size - 1;
 
     var idxAfter;
@@ -228,7 +289,7 @@ Symmetry.diffArray = function(left, right, options) {
     }
 
     // Backtrack through the table.
-    while (idxLeft >= 0 && idxRight >= 0) {
+    while (idxLeft >= start && idxRight >= start) {
         diff = diffs[idx];
 
         if (diff === 'reset') {
@@ -249,9 +310,9 @@ Symmetry.diffArray = function(left, right, options) {
         }
     }
     // Flush both sides.
-    while (idxLeft >= 0)
+    while (idxLeft >= start)
         removeItem();
-    while (idxRight >= 0)
+    while (idxRight >= start)
         addItem();
 
     // If we splice the entire array, return reset.
@@ -262,10 +323,7 @@ Symmetry.diffArray = function(left, right, options) {
     var res = {t:'a'};
     if (numPatches) res.p = p;
     if (s.length)   res.s = s;
-    if (!res.p && !res.s)
-        return 'none';
-    else
-        return res;
+    return res;
 };
 
 })();
