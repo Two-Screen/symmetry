@@ -15,21 +15,21 @@ else {
 // Fix up some JavaScript types and values that are not JSON. This may still
 // return undefined to signal the value is normally not serialized at all.
 Symmetry.normalizeJson = function(val, options) {
-    if (val && val.toJSON)
-        val = val.toJSON(options || { symmetry: true });
-
-    var type = typeof(val);
-
-    // Treat functions as undefined.
-    if (type === 'function')
-        return undefined;
-
-    // Special numbers serialize to null.
-    if (type === 'number') {
-        if (isNaN(val) || val === Infinity || val === -Infinity)
-            return null;
+    if (val instanceof Object) {
+        // Call toJSON method.
+        if (typeof(val.toJSON) === 'function')
+            val = val.toJSON(options || { symmetry: true });
+        // Treat functions as undefined.
+        if (typeof(val) === 'function')
+            val = undefined;
     }
-
+    else {
+        // Special numbers serialize to null.
+        if (typeof(val) === 'number') {
+            if (val !== val || val === Infinity || val === -Infinity)
+                val = null;
+        }
+    }
     return val;
 };
 
@@ -50,17 +50,17 @@ Symmetry.diffValue = function(left, right, options) {
     if (left === right)
         return 'none';
 
-    if (left && right) {
-        // Descend into two arrays.
+    var leftIsObject  = typeof(left)  === 'object' && left  !== null;
+    var rightIsObject = typeof(right) === 'object' && right !== null;
+    if (leftIsObject && rightIsObject) {
         var leftIsArray  = Array.isArray(left);
         var rightIsArray = Array.isArray(right);
+
+        // Descend into two arrays.
         if (leftIsArray && rightIsArray)
             return this.diffArray(left, right, options);
-
         // Descend into two regular objects.
-        var leftIsObject  = typeof(left)  === 'object' && !leftIsArray;
-        var rightIsObject = typeof(right) === 'object' && !rightIsArray;
-        if (leftIsObject && rightIsObject)
+        else if (!leftIsArray && !rightIsArray)
             return this.diffObject(left, right, options);
     }
 
