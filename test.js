@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var test = require('tape');
 var Backbone = require('backbone');
 var Symmetry = require('./');
