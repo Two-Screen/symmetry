@@ -343,6 +343,38 @@ test('empty objects', function(t) {
     t.end();
 });
 
+test('patch with preserve option', function(t) {
+    var obj, target, patch, repl;
+
+    target = {foo:obj={bar:3,$:7}};
+    patch = {t:'o',s:{foo:repl={baz:5}}};
+    Symmetry.patch(target, patch, {
+        preserve: true,
+        clearFilter: function(val, key) { return key !== '$'; }
+    });
+
+    t.equal(target.foo, obj, 'set object should be reused');
+    t.equal(target.foo.bar, undefined, 'should remove old properties');
+    t.equal(target.foo.baz, 5, 'should set new properties');
+    t.equal(target.foo.$, 7, 'should honour clear filter');
+
+    target = ['before',obj={bar:3},'after'];
+    patch = {t:'a',s:[[1,1,repl={baz:5}]]};
+    Symmetry.patch(target, patch, { preserve: true });
+
+    t.equal(target[1], obj, 'set object should be reused');
+    t.equal(target[0], 'before', 'should not touch rest of array (before)');
+    t.equal(target[2], 'after', 'should not touch rest of array (after)');
+
+    target = [obj=[3]];
+    patch = {t:'a',s:[[0,1,repl=[5]]]};
+    Symmetry.patch(target, patch, { preserve: true });
+    t.equal(target[0], obj, 'set array should be reused');
+    t.deepEqual(target[0], repl, 'should replace array contents');
+
+    t.end();
+});
+
 test('examples', function(t) {
     var a, b, obj, diff, scope, people, result, expect;
 
