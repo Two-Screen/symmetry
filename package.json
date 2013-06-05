@@ -11,8 +11,8 @@
     },
     "keywords": ["diff", "patch", "sync"],
     "devDependencies": {
-        "tape": "0.2",
-        "backbone": "0.9"
+        "tape": "1",
+        "backbone": "1"
     },
     "scripts": {
         "test": "node ./test.js"
