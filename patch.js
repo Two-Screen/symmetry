@@ -2,7 +2,11 @@
 "use strict";
 /*global exports, window */
 
-var hasOwnProp = Object.hasOwnProperty;
+var hasOwnProp = Object.prototype.hasOwnProperty;
+var toString = Object.prototype.toString;
+var isArray = Array.isArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+};
 
 // Get the exports object.
 var Symmetry;
@@ -103,8 +107,8 @@ Symmetry.setPreserve = function(obj, prop, val, options) {
     var valIsObject = typeof(val) === 'object' && val !== null;
     var curIsObject = typeof(cur) === 'object' && cur !== null;
     if (valIsObject && curIsObject) {
-        var valIsArray = Array.isArray(val);
-        var curIsArray = Array.isArray(cur);
+        var valIsArray = isArray(val);
+        var curIsArray = isArray(cur);
 
         // Replace array contents.
         if (valIsArray && curIsArray) {

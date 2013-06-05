@@ -2,6 +2,11 @@
 "use strict";
 /*global exports, window */
 
+var toString = Object.prototype.toString;
+var isArray = Array.isArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+};
+
 // Get the exports object.
 var Symmetry;
 if (typeof(exports) !== 'undefined') {
@@ -53,8 +58,8 @@ Symmetry.diffValue = function(left, right, options) {
     var leftIsObject  = typeof(left)  === 'object' && left  !== null;
     var rightIsObject = typeof(right) === 'object' && right !== null;
     if (leftIsObject && rightIsObject) {
-        var leftIsArray  = Array.isArray(left);
-        var rightIsArray = Array.isArray(right);
+        var leftIsArray  = isArray(left);
+        var rightIsArray = isArray(right);
 
         // Descend into two arrays.
         if (leftIsArray && rightIsArray)

@@ -2,6 +2,11 @@
 "use strict";
 /*global require, module, window */
 
+var toString = Object.prototype.toString;
+var isArray = Array.isArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+};
+
 // Get the exports object.
 var Symmetry;
 if (typeof(module) !== 'undefined') {
@@ -23,7 +28,7 @@ Symmetry.cloneJson = function(val, options) {
 Symmetry.cloneJsonValue = function(val, options) {
     if (!val || typeof(val) !== 'object')
         return val;
-    else if (Array.isArray(val))
+    else if (isArray(val))
         return this.cloneJsonArray(val, options);
     else
         return this.cloneJsonObject(val, options);
