@@ -14,6 +14,8 @@ module.exports = {
     patchObject: patch.patchObject,
     patchArray: patch.patchArray,
     setPreserve: patch.setPreserve,
+    resetArray: patch.resetArray,
+    resetObject: patch.resetObject,
 
     cloneJson: scope.cloneJson,
     cloneJsonValue: scope.cloneJsonValue,

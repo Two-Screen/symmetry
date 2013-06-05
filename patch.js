@@ -112,30 +112,47 @@ Symmetry.setPreserve = function(obj, prop, val, options) {
 
         // Replace array contents.
         if (valIsArray && curIsArray) {
-            this.patchArray(cur, { s: [
-                [0, cur.length].concat(val)
-            ] }, options);
+            this.resetArray(cur, val, options);
             return;
         }
 
         // Replace object contents.
         else if (!valIsArray && !curIsArray) {
-            var clearFilter = options && options.clearFilter;
-            var r = [];
-            for (var key in cur) {
-                if (hasOwnProp.call(cur, key)) {
-                    if (!clearFilter || clearFilter(cur[key], key)) {
-                        r.push(key);
-                    }
-                }
-            }
-            this.patchObject(cur, { r: r, s: val }, options);
+            this.resetObject(cur, val, options);
             return;
         }
     }
 
     // Incompatible, reset the property.
     obj[prop] = val;
+};
+
+// Reset array contents.
+Symmetry.resetArray = function(arr, contents, options) {
+    this.patchArray(arr, { s: [
+        [0, arr.length].concat(contents)
+    ] }, options);
+};
+
+// Reset object contents.
+Symmetry.resetObject = function(obj, contents, options) {
+    var key;
+
+    var dontUnset = {};
+    for (key in contents) {
+        dontUnset[key] = true;
+    }
+
+    var clearFilter = options && options.clearFilter;
+    var r = [];
+    for (key in obj) {
+        if (!hasOwnProp.call(obj, key)) continue;
+        if (dontUnset[key] === true) continue;
+        if (clearFilter && !clearFilter(obj[key], key)) continue;
+        r.push(key);
+    }
+
+    this.patchObject(obj, { r: r, s: contents }, options);
 };
 
 })();
