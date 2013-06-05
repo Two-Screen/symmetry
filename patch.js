@@ -2,6 +2,8 @@
 "use strict";
 /*global exports, window */
 
+var hasOwnProp = Object.hasOwnProperty;
+
 // Get the exports object.
 var Symmetry;
 if (typeof(exports) !== 'undefined') {
@@ -30,6 +32,7 @@ Symmetry.patchValue = function(val, patch, options) {
 // Apply an object patch. (`t:'o'`)
 Symmetry.patchObject = function(obj, patch, options) {
     var i, key;
+    var preserve = options && options.preserve;
 
     var r = patch.r;
     if (r) {
@@ -43,7 +46,12 @@ Symmetry.patchObject = function(obj, patch, options) {
     var s = patch.s;
     if (s) {
         for (key in s) {
-            obj[key] = s[key];
+            if (preserve) {
+                this.setPreserve(obj, key, s[key], options);
+            }
+            else {
+                obj[key] = s[key];
+            }
         }
     }
 
@@ -57,11 +65,11 @@ Symmetry.patchObject = function(obj, patch, options) {
 
 // Apply an array patch. (`t:'a'`)
 Symmetry.patchArray = function(arr, patch, options) {
-    var i, idx;
+    var preserve = options && options.preserve;
 
     var p = patch.p;
     if (p) {
-        for (idx in p) {
+        for (var idx in p) {
             this.patchValue(arr[idx], p[idx], options);
         }
     }
@@ -69,10 +77,61 @@ Symmetry.patchArray = function(arr, patch, options) {
     var s = patch.s;
     if (s) {
         var numSplices = s.length;
-        for (i = 0; i < numSplices; i++) {
-            arr.splice.apply(arr, s[i]);
+        for (var i = 0; i < numSplices; i++) {
+            var splice = s[i];
+            if (preserve) {
+                var start = splice[0];
+                var numPreserve = Math.min(splice[1], splice.length - 2);
+                for (var j = 0; j < numPreserve; j++) {
+                    this.setPreserve(arr, start + j, splice[2 + j], options);
+                }
+
+                splice = [
+                    splice[0] + numPreserve,
+                    splice[1] - numPreserve,
+                ].concat(splice.slice(2 + numPreserve));
+            }
+            arr.splice.apply(arr, splice);
         }
     }
+};
+
+// Set a property, trying to preserve an existing object or array.
+Symmetry.setPreserve = function(obj, prop, val, options) {
+    var cur = obj[prop];
+
+    var valIsObject = typeof(val) === 'object' && val !== null;
+    var curIsObject = typeof(cur) === 'object' && cur !== null;
+    if (valIsObject && curIsObject) {
+        var valIsArray = Array.isArray(val);
+        var curIsArray = Array.isArray(cur);
+
+        // Replace array contents.
+        if (valIsArray && curIsArray) {
+            this.patchArray(cur, { s: [
+                [0, cur.length].concat(val)
+            ] }, options);
+            return;
+        }
+
+        // Replace object contents.
+        else if (!valIsArray && !curIsArray) {
+            var clearFilter = options && options.clearFilter;
+            var r = [];
+            for (var key in cur) {
+                if (hasOwnProp.call(cur, key)) {
+                    if (!clearFilter || clearFilter(cur[key], key)) {
+                        r.push(key);
+                    }
+                }
+            }
+            this.patchObject(cur, { r: r, s: val }, options);
+            return;
+        }
+    }
+
+    // Incompatible, reset the property.
+    obj[prop] = val;
 };
 
 })();

@@ -59,6 +59,7 @@ Symmetry.diffValue = function(left, right, options) {
         // Descend into two arrays.
         if (leftIsArray && rightIsArray)
             return this.diffArray(left, right, options);
+
         // Descend into two regular objects.
         else if (!leftIsArray && !rightIsArray)
             return this.diffObject(left, right, options);

@@ -13,6 +13,7 @@ module.exports = {
     patchValue: patch.patchValue,
     patchObject: patch.patchObject,
     patchArray: patch.patchArray,
+    setPreserve: patch.setPreserve,
 
     cloneJson: scope.cloneJson,
     cloneJsonValue: scope.cloneJsonValue,
