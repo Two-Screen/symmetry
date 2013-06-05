@@ -59,9 +59,8 @@ Symmetry.cloneJsonArray = function(arr, options) {
 
 // The default filter for scope object.
 // Treats all attributes starting with `$` as undefined.
-var scopeKeyRegexp = /^\$/;
 var scopeFilter = Symmetry.scopeFilter = function(val, key) {
-    if (scopeKeyRegexp.test(key))
+    if (key.charAt(0) === '$')
         return undefined;
     else
         return val;
