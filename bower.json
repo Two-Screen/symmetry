@@ -1,7 +1,7 @@
 {
   "name": "symmetry",
   "main": ["diff.js", "patch.js", "scope.js", "index.js"],
-  "version": "0.3.1",
+  "version": "0.3.2",
   "homepage": "https://github.com/Two-Screen/symmetry",
   "authors": [
     "Stéphan Kochen <stephan@kochen.nl>"
