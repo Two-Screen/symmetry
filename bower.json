@@ -4,7 +4,7 @@
   "version": "0.3.1",
   "homepage": "https://github.com/Two-Screen/symmetry",
   "authors": [
-    "Stéphan Kochen <gh@stephank.nl>"
+    "Stéphan Kochen <stephan@kochen.nl>"
   ],
   "description": "Sync objects by diffing and patching",
   "keywords": [
