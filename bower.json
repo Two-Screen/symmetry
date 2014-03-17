@@ -1,6 +1,6 @@
 {
   "name": "symmetry",
-  "main": "index.js",
+  "main": ["diff.js", "patch.js", "scope.js", "index.js"],
   "version": "0.3.1",
   "homepage": "https://github.com/Two-Screen/symmetry",
   "authors": [
