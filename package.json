@@ -17,5 +17,11 @@
     },
     "scripts": {
         "test": "node ./test.js"
+    },
+    "jshintConfig": {
+        "enforceall": true,
+        "curly": false,
+        "forin": false,
+        "node": true
     }
 }

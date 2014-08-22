@@ -5,7 +5,7 @@
 var hasOwnProp = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;
 var isArray = Array.isArray || function(obj) {
-    return toString.call(obj) == '[object Array]';
+    return toString.call(obj) === '[object Array]';
 };
 
 // Get the exports object.
@@ -92,7 +92,7 @@ Symmetry.patchArray = function(arr, patch, options) {
 
                 splice = [
                     splice[0] + numPreserve,
-                    splice[1] - numPreserve,
+                    splice[1] - numPreserve
                 ].concat(splice.slice(2 + numPreserve));
             }
             arr.splice.apply(arr, splice);
