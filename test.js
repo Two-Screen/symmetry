@@ -12,7 +12,7 @@ function iop(t, i, o, p, message) {
     t.deepEqual(res, p, message + (diffOnly ? '' : ' (verify diff)'));
 
     if (!diffOnly) {
-        Symmetry.patch(i, p);
+        Symmetry.patch(i, res);
         t.deepEqual(i, o, message + ' (verify patch)');
     }
 }
