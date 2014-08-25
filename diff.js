@@ -7,6 +7,14 @@ var isArray = Array.isArray || function(obj) {
     return toString.call(obj) === '[object Array]';
 };
 
+function Dummy() {}
+function inherit(parent) {
+    Dummy.prototype = parent;
+    var obj = new Dummy();
+    obj.parent = parent;
+    return obj;
+}
+
 // Get the exports object.
 var Symmetry;
 if (typeof(exports) !== 'undefined') {
@@ -214,121 +222,127 @@ Symmetry.diffArray = function(left, right, options) {
         return {t:'a', s:[slice]};
     }
 
-    // For the remainder, build a table of diffs, and a table of LCS lengths.
-    var width = 1 + endLeft - start + 1;
-    var height = 1 + endRight - start + 1;
+    // For the remainder, do a full search. This implements the greedy
+    // algorithm described in Myers' paper: http://xmailserver.org/diff2.pdf
+    // FIXME: Look into the refinements described in the paper.
+    var width = endLeft - start + 1;
+    var height = endRight - start + 1;
+    var max = width * height;
     var diag = width + 1;
-    var size = width * height;
-    var lengths = new Array(size);
-    var diffs = new Array(size);
-    var idxLeft, idxRight, diff;
 
-    // Add sentinels.
-    for (idx = 0; idx < width; idx += 1)
-        lengths[idx] = 0;
-    for (idx = 0; idx < size; idx += width)
-        lengths[idx] = 0;
-    // We already calculated these.
-    diffs[diag] = firstDiff;
-    diffs[size - 1] = lastDiff;
+    var diffs = new Array(max);
+    diffs[0] = firstDiff;
+    diffs[max - 1] = lastDiff;
 
-    // Skip across sentinels.
-    idx = width;
-    for (idxRight = start; idxRight <= endRight; idxRight += 1) {
-        idx += 1;
-        for (idxLeft = start; idxLeft <= endLeft; idxLeft += 1) {
-            // Diff and store result.
-            if (!(diff = diffs[idx])) {
-                valLeft  = this.normalizeJson(left[idxLeft], options);
-                valRight = this.normalizeJson(right[idxRight], options);
-                diff = diffs[idx] = this.diffValue(valLeft, valRight, options);
+    var v, d, k, x, y, diff;
+    v = { 1: 0 };  // sentinel
+    outer: for (d = 0; d < max; d++) {
+        v = inherit(v);
+
+        for (k = -d; k <= d; k += 2) {
+            // Decide on direction.
+            if (k === -d || (k !== d && v[k-1] < v[k+1]))
+                x = v[k+1];
+            else
+                x = v[k-1] + 1;
+            y = x - k;
+
+            // Exhaust diagonal until we hit a reset.
+            idx = y * width + x;
+            while (idx < max) {
+                diff = diffs[idx];
+                if (!diff) {
+                    valLeft  = this.normalizeJson(left[start + x], options);
+                    valRight = this.normalizeJson(right[start + y], options);
+                    diff = diffs[idx] = this.diffValue(valLeft, valRight, options);
+                }
+
+                if (diff === 'reset')
+                    break;
+
+                x++; y++; idx += diag;
             }
 
-            // Treat exact matches, but also patches, as equal.
-            if (diff !== 'reset') {
-                lengths[idx] = lengths[idx - diag] + 1;
-            }
-            else {
-                lengths[idx] = Math.max(
-                    lengths[idx - 1],
-                    lengths[idx - width]
-                );
-            }
+            v[k] = x;
 
-            idx += 1;
+            if (x >= width && y >= height)
+                break outer;
         }
     }
 
     // Collect patches and splices.
-    var numPatches = 0;
+    var havePatches = false;
     var p = {};
     var s = [];
 
-    idxLeft = endLeft;
-    idxRight = endRight;
-    idx = size - 1;
-
-    var idxAfter;
-    var current = [null, null];
-    // Push the current left side onto the splice as a removed item.
-    function removeItem() {
-        idxAfter = idxLeft + 1;
-        if (current[0] === idxAfter) {
-            current[0] -= 1; current[1] += 1;
-        }
-        else {
-            s.push(current = [idxLeft, 1]);
-        }
-        idxLeft -= 1; idx -= 1;
+    if (d === max) {
+        // If we splice the entire array, return a reset.
+        if (start === 0 && width === lenLeft)
+            return 'reset';
+        // If we have no diagonals, we can optimize.
+        else
+            s.push([start, width].concat(right.slice(start, endRight + 1)));
     }
-    // Push the current right side onto the splice as an added item.
-    function addItem() {
-        idxAfter = idxLeft + 1;
-        valRight = self.normalizeJson(right[idxRight], options);
-        if (current[0] === idxAfter) {
-            current.splice(2, 0, valRight);
-        }
-        else {
-            s.push(current = [idxAfter, 0, valRight]);
-        }
-        idxRight -= 1; idx -= width;
-    }
+    else {
+        k = width - height;
+        var current = [null, null];
+        while (d-- >= 0) {
+            // Decide on direction.
+            var isVert = v[k-1] === undefined ||
+                (v[k+1] !== undefined && v[k-1] < v[k+1]);
+            k = isVert ? k+1 : k-1;
+            x = v[k];
+            y = x - k;
 
-    // Backtrack through the table.
-    while (idxLeft >= start && idxRight >= start) {
-        diff = diffs[idx];
-
-        if (diff === 'reset') {
-            // Left side is not in the LCS, so that item was removed.
-            if (lengths[idx - 1] > lengths[idx - width])
-                removeItem();
-            // Right side is not in the LCS, so that item was added.
-            else
-                addItem();
-        }
-        // Both are in the LCS, simply use the diff.
-        else {
-            if (diff !== 'none') {
-                p[idxLeft] = diff;
-                numPatches += 1;
+            // Append the move to the current splice, or create a new one.
+            // The `y !== -1` check skips the sentinel.
+            var idxLeft = start + x;
+            if (isVert) {  // element added
+                if (y !== -1) {
+                    if (current[0] === idxLeft) {
+                        valRight = this.normalizeJson(right[start + y], options);
+                        current.splice(2, 0, valRight);
+                    }
+                    else {
+                        s.push(current = [idxLeft, 0, right[start + y]]);
+                    }
+                }
+                y++;
             }
-            idxLeft -= 1; idxRight -= 1; idx -= diag;
+            else {  // element removed
+                if (y !== -1) {
+                    if (current[0] === idxLeft + 1) {
+                        current[0] -= 1; current[1] += 1;
+                    }
+                    else {
+                        s.push(current = [idxLeft, 1]);
+                    }
+                }
+                x++;
+            }
+
+            // Exhaust diagonal until we hit a reset.
+            idx = y * width + x;
+            while (idx < max) {
+                diff = diffs[idx];
+                if (diff === 'reset')
+                    break;
+                if (diff !== 'none') {
+                    p[start + x] = diff;
+                    havePatches = true;
+                }
+
+                x++; y++; idx += diag;
+            }
+
+            v = v.parent;
         }
     }
-    // Flush both sides.
-    while (idxLeft >= start)
-        removeItem();
-    while (idxRight >= start)
-        addItem();
-
-    // If we splice the entire array, return reset.
-    if (s[0] && s[0][1] === lenLeft)
-        return 'reset';
 
     // Build the patch object.
     var res = {t:'a'};
-    if (numPatches) res.p = p;
-    if (s.length)   res.s = s;
+    if (havePatches) res.p = p;
+    if (s.length)    res.s = s;
     return res;
 };
 
