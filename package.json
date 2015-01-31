@@ -22,6 +22,7 @@
         "enforceall": true,
         "curly": false,
         "forin": false,
-        "node": true
+        "node": true,
+        "singleGroups": false
     }
 }
