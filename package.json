@@ -11,7 +11,7 @@
     },
     "keywords": ["diff", "patch", "sync"],
     "devDependencies": {
-        "tape": "2",
+        "tape": "3",
         "benchmark": "1",
         "backbone": "1"
     },
