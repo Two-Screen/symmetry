@@ -37,8 +37,10 @@ Symmetry.cloneJsonValue = function(val, options) {
 // Create a deep clone of an object.
 Symmetry.cloneJsonObject = function(obj, options) {
     var clone = {};
+    var keys = Object.keys(obj);
     var filter = options && options.filter;
-    for (var key in obj) {
+    for (var i in keys) {
+        var key = keys[i];
         var attrVal = this.normalizeJson(obj[key], options);
         if (filter)
             attrVal = filter(attrVal, key);
