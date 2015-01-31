@@ -3,7 +3,7 @@
     "description": "Sync objects by diffing and patching",
     "author": "Stéphan Kochen <stephan@kochen.nl>",
     "license" : "MIT",
-    "version": "0.3.2",
+    "version": "0.4.0",
     "homepage": "https://github.com/Two-Screen/symmetry",
     "repository": {
         "type": "git",
