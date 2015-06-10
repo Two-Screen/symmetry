@@ -19,15 +19,15 @@ else {
 
 // Apply an object or array patch in-place.
 Symmetry.patch = function(val, patch, options) {
-    this.patchValue(val, patch, options);
+    return this.patchValue(val, patch, options);
 };
 
 // Apply a patch based on its type.
 Symmetry.patchValue = function(val, patch, options) {
     if (patch.t === 'o')
-        this.patchObject(val, patch, options);
+        return this.patchObject(val, patch, options);
     else if (patch.t === 'a')
-        this.patchArray(val, patch, options);
+        return this.patchArray(val, patch, options);
     else
         throw new Error("Invalid patch");
 };
@@ -61,9 +61,11 @@ Symmetry.patchObject = function(obj, patch, options) {
     var p = patch.p;
     if (p) {
         for (key in p) {
-            this.patchValue(obj[key], p[key], options);
+            obj[key] = this.patchValue(obj[key], p[key], options);
         }
     }
+
+    return obj;
 };
 
 // Apply an array patch. (`t:'a'`)
@@ -73,7 +75,7 @@ Symmetry.patchArray = function(arr, patch, options) {
     var p = patch.p;
     if (p) {
         for (var idx in p) {
-            this.patchValue(arr[idx], p[idx], options);
+            p[idx] = this.patchValue(arr[idx], p[idx], options);
         }
     }
 
@@ -97,6 +99,8 @@ Symmetry.patchArray = function(arr, patch, options) {
             arr.splice.apply(arr, splice);
         }
     }
+
+    return arr;
 };
 
 // Set a property, trying to preserve an existing object or array.
@@ -128,7 +132,7 @@ Symmetry.setPreserve = function(obj, prop, val, options) {
 
 // Reset array contents.
 Symmetry.resetArray = function(arr, contents, options) {
-    this.patchArray(arr, { s: [
+    return this.patchArray(arr, { s: [
         [0, arr.length].concat(contents)
     ] }, options);
 };
@@ -151,7 +155,7 @@ Symmetry.resetObject = function(obj, contents, options) {
         r.push(key);
     }
 
-    this.patchObject(obj, { r: r, s: contents }, options);
+    return this.patchObject(obj, { r: r, s: contents }, options);
 };
 
 })();
