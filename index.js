@@ -1,3 +1,5 @@
+"use strict";
+
 var diff = require('./diff');
 var patch = require('./patch');
 var scope = require('./scope');

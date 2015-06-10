@@ -1,6 +1,5 @@
 (function() {
 "use strict";
-/*global exports, window */
 
 var hasOwnProp = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;

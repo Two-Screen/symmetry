@@ -1,6 +1,5 @@
 (function() {
 "use strict";
-/*global exports, window */
 
 var toString = Object.prototype.toString;
 var isArray = Array.isArray || function(obj) {
@@ -159,8 +158,6 @@ Symmetry.diffObject = function(left, right, options) {
 //  - `s` is a list of splices, each an array of `splice()` arguments.
 //    These are in reverse order, so they can be applied as specified.
 Symmetry.diffArray = function(left, right, options) {
-    var self = this;
-
     var lenLeft = left.length;
     var lenRight = right.length;
     var valLeft, valRight, idx, slice;

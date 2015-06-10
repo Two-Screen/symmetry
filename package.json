@@ -18,11 +18,20 @@
     "scripts": {
         "test": "node ./test.js"
     },
-    "jshintConfig": {
-        "enforceall": true,
-        "curly": false,
-        "forin": false,
-        "node": true,
-        "singleGroups": false
+    "eslintConfig": {
+        "env": {
+            "browser": true,
+            "node": true
+        },
+        "rules": {
+            "curly": 0,
+            "quotes": 0,
+            "space-unary-ops": 0,
+            "key-spacing": 0,
+            "comma-spacing": 0,
+            "no-multi-spaces": 0,
+            "space-infix-ops": 0,
+            "no-labels": 0
+        }
     }
 }

@@ -1,6 +1,5 @@
 (function() {
 "use strict";
-/*global require, module, window */
 
 var toString = Object.prototype.toString;
 var isArray = Array.isArray || function(obj) {
