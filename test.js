@@ -346,13 +346,13 @@ test('empty objects', function(t) {
     t.end();
 });
 
-test('patch with preserve option', function(t) {
+test('patch with preserve strategy', function(t) {
     var obj, target, patch, repl;
 
     target = {foo:obj={bar:3,$:7}};
     patch = {t:'o',s:{foo:repl={baz:5}}};
     Symmetry.patch(target, patch, {
-        preserve: true,
+        strategy: 'preserve',
         clearFilter: function(val, key) { return key !== '$'; }
     });
 
@@ -363,7 +363,7 @@ test('patch with preserve option', function(t) {
 
     target = ['before',obj={bar:3},'after'];
     patch = {t:'a',s:[[1,1,repl={baz:5}]]};
-    Symmetry.patch(target, patch, { preserve: true });
+    Symmetry.patch(target, patch, { strategy: 'preserve' });
 
     t.equal(target[1], obj, 'set object should be reused');
     t.equal(target[0], 'before', 'should not touch rest of array (before)');
@@ -371,9 +371,35 @@ test('patch with preserve option', function(t) {
 
     target = [obj=[3]];
     patch = {t:'a',s:[[0,1,repl=[5]]]};
-    Symmetry.patch(target, patch, { preserve: true });
+    Symmetry.patch(target, patch, { strategy: 'preserve' });
     t.equal(target[0], obj, 'set array should be reused');
     t.deepEqual(target[0], repl, 'should replace array contents');
+
+    t.end();
+});
+
+test('patch with copy-on-write strategy', function(t) {
+    var target, patch, result;
+
+    target = {one:{x:3},two:{x:5}};
+    patch = {t:'o',p:{one:{t:'o',s:{x:8}}}};
+    result = Symmetry.patch(target, patch, { strategy: 'cow' });
+
+    t.notEqual(result, target, 'should copy the root');
+    t.notEqual(result.one, target.one, 'should copy the first object');
+    t.equal(result.two, target.two, 'should reuse the second object');
+    t.equal(result.one.x, 8, 'should set new properties');
+    t.equal(target.one.x, 3, 'should not touch the original');
+
+    target = [{x:3},{x:5}];
+    patch = {t:'a',p:{0:{t:'o',s:{x:8}}}};
+    result = Symmetry.patch(target, patch, { strategy: 'cow' });
+
+    t.notEqual(result, target, 'should copy the root');
+    t.notEqual(result[0], target[0], 'should copy the first object');
+    t.equal(result[1], target[1], 'should reuse the second object');
+    t.equal(result[0].x, 8, 'should set new properties');
+    t.equal(target[0].x, 3, 'should not touch the original');
 
     t.end();
 });

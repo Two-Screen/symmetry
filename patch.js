@@ -35,7 +35,14 @@ Symmetry.patchValue = function(val, patch, options) {
 // Apply an object patch. (`t:'o'`)
 Symmetry.patchObject = function(obj, patch, options) {
     var i, key;
-    var preserve = options && options.preserve;
+    var strategy = options && options.strategy;
+
+    if (strategy === 'cow') {
+        i = obj;
+        obj = {};
+        for (key in i)
+            obj[key] = i[key];
+    }
 
     var r = patch.r;
     if (r) {
@@ -49,7 +56,7 @@ Symmetry.patchObject = function(obj, patch, options) {
     var s = patch.s;
     if (s) {
         for (key in s) {
-            if (preserve) {
+            if (strategy === 'preserve') {
                 this.setPreserve(obj, key, s[key], options);
             }
             else {
@@ -70,12 +77,15 @@ Symmetry.patchObject = function(obj, patch, options) {
 
 // Apply an array patch. (`t:'a'`)
 Symmetry.patchArray = function(arr, patch, options) {
-    var preserve = options && options.preserve;
+    var strategy = options && options.strategy;
+
+    if (strategy === 'cow')
+        arr = arr.slice(0);
 
     var p = patch.p;
     if (p) {
         for (var idx in p) {
-            p[idx] = this.patchValue(arr[idx], p[idx], options);
+            arr[idx] = this.patchValue(arr[idx], p[idx], options);
         }
     }
 
@@ -84,7 +94,7 @@ Symmetry.patchArray = function(arr, patch, options) {
         var numSplices = s.length;
         for (var i = 0; i < numSplices; i++) {
             var splice = s[i];
-            if (preserve) {
+            if (strategy === 'preserve') {
                 var start = splice[0];
                 var numPreserve = Math.min(splice[1], splice.length - 2);
                 for (var j = 0; j < numPreserve; j++) {
