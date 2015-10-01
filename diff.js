@@ -224,16 +224,16 @@ Symmetry.diffArray = function(left, right, options) {
     // FIXME: Look into the refinements described in the paper.
     var width = endLeft - start + 1;
     var height = endRight - start + 1;
-    var max = width * height;
+    var size = width * height;
     var diag = width + 1;
 
-    var diffs = new Array(max);
+    var diffs = new Array(size);
     diffs[0] = firstDiff;
-    diffs[max - 1] = lastDiff;
+    diffs[size - 1] = lastDiff;
 
     var v, d, k, x, y, diff;
     v = { 1: 0 };  // sentinel
-    outer: for (d = 0; d < max; d++) {
+    outer: for (d = 0; d < size; d++) {
         v = inherit(v);
 
         for (k = -d; k <= d; k += 2) {
@@ -246,7 +246,7 @@ Symmetry.diffArray = function(left, right, options) {
 
             // Exhaust diagonal until we hit a reset.
             idx = y * width + x;
-            while (idx < max) {
+            while (idx < size && x < width && y < height) {
                 diff = diffs[idx];
                 if (!diff) {
                     valLeft  = this.normalizeJson(left[start + x], options);
@@ -272,7 +272,7 @@ Symmetry.diffArray = function(left, right, options) {
     var p = {};
     var s = [];
 
-    if (d === max) {
+    if (d === size) {
         // If we splice the entire array, return a reset.
         if (start === 0 && width === lenLeft)
             return 'reset';
@@ -320,7 +320,7 @@ Symmetry.diffArray = function(left, right, options) {
 
             // Exhaust diagonal until we hit a reset.
             idx = y * width + x;
-            while (idx < max) {
+            while (idx < size && x < width && y < height) {
                 diff = diffs[idx];
                 if (diff === 'reset')
                     break;

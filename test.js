@@ -184,6 +184,12 @@ test('array diffs', function(t) {
         'complete change of an object item');
 
     iop(t,
+        [{x:1, y:1}],
+        [{x:1, y:2}, {x:1, y:3}, {x:1, y:4}],
+        {t:'a', p:{0:{t:'o', s:{y:2}}}, s:[[1, 0, {x:1, y:3}, {x:1, y:4}]]},
+        'all partial changes');
+
+    iop(t,
         [1, 2, [3, 4], 5, 6, 7, 8, [9, 10], 11, 12, 13, 14],
         [1, 2, [3, 94], 5, 96, 97, 8, [9, 910], 11, 1213, 14],
         {t:'a',
