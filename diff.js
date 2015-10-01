@@ -246,7 +246,7 @@ Symmetry.diffArray = function(left, right, options) {
 
             // Exhaust diagonal until we hit a reset.
             idx = y * width + x;
-            while (idx < size) {
+            while (idx < size && x < width && y < height) {
                 diff = diffs[idx];
                 if (!diff) {
                     valLeft  = this.normalizeJson(left[start + x], options);
@@ -320,7 +320,7 @@ Symmetry.diffArray = function(left, right, options) {
 
             // Exhaust diagonal until we hit a reset.
             idx = y * width + x;
-            while (idx < size) {
+            while (idx < size && x < width && y < height) {
                 diff = diffs[idx];
                 if (diff === 'reset')
                     break;
