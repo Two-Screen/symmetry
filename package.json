@@ -1,37 +1,34 @@
 {
-    "name": "symmetry",
-    "description": "Sync objects by diffing and patching",
-    "author": "Stéphan Kochen <stephan@kochen.nl>",
-    "license" : "MIT",
-    "version": "0.5.1",
-    "homepage": "https://github.com/Two-Screen/symmetry",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/Two-Screen/symmetry.git"
-    },
-    "keywords": ["diff", "patch", "sync"],
-    "devDependencies": {
-        "tape": "4",
-        "benchmark": "1",
-        "backbone": "1"
-    },
-    "scripts": {
-        "test": "node ./test.js"
-    },
-    "eslintConfig": {
-        "env": {
-            "browser": true,
-            "node": true
-        },
-        "rules": {
-            "curly": 0,
-            "quotes": 0,
-            "space-unary-ops": 0,
-            "key-spacing": 0,
-            "comma-spacing": 0,
-            "no-multi-spaces": 0,
-            "space-infix-ops": 0,
-            "no-labels": 0
-        }
-    }
+  "name": "symmetry",
+  "description": "Sync objects by diffing and patching",
+  "author": "Stéphan Kochen <stephan@kochen.nl>",
+  "license": "MIT",
+  "version": "0.5.1",
+  "homepage": "https://github.com/Two-Screen/symmetry",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Two-Screen/symmetry.git"
+  },
+  "keywords": [
+    "diff",
+    "patch",
+    "sync"
+  ],
+  "devDependencies": {
+    "@types/backbone": "^1.4.1",
+    "@types/benchmark": "^1.0.31",
+    "@types/node": "^12.6.9",
+    "backbone": "^1.4.0",
+    "benchmark": "2.1.4",
+    "prettier": "^1.18.2",
+    "tap": "^14.5.0",
+    "typescript": "^3.5.3"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "fmt": "prettier --write '*.{json,md}' 'src/**/*.ts'",
+    "test": "tap ./dist/tests/test.js",
+    "prepare": "tsc"
+  }
 }
