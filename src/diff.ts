@@ -11,7 +11,7 @@ import {
   ArrayPatch,
   OuterObjectPatch,
   OuterArrayPatch,
-  OuterPatch
+  OuterPatch,
 } from "./types";
 
 /// Fix up some JavaScript types and values that are not JSON.
@@ -198,7 +198,7 @@ export const createArrayPatch = <T extends AnyArray>(
     const splice: ArraySplice<T> = [
       lenLeft,
       0,
-      ...right.slice(start, lenRight).map(normalizeJson)
+      ...right.slice(start, lenRight).map(normalizeJson),
     ];
     return { t: "a", s: [splice] };
   } else if (start === lenRight) {
@@ -228,7 +228,7 @@ export const createArrayPatch = <T extends AnyArray>(
     const splice: ArraySplice<T> = [
       start,
       0,
-      ...right.slice(start, endRight + 1).map(normalizeJson)
+      ...right.slice(start, endRight + 1).map(normalizeJson),
     ];
     return { t: "a", s: [splice] };
   } else if (endRight < start) {

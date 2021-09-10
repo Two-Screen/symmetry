@@ -17,13 +17,13 @@
   "main": "./dist",
   "devDependencies": {
     "@types/backbone": "^1.4.1",
-    "@types/benchmark": "^1.0.31",
-    "@types/node": "^12.6.9",
+    "@types/benchmark": "^2.1.1",
+    "@types/node": "^16.9.1",
     "backbone": "^1.4.0",
     "benchmark": "2.1.4",
-    "prettier": "^1.18.2",
-    "tap": "^14.5.0",
-    "typescript": "^3.5.3"
+    "prettier": "^2.4.0",
+    "tap": "^15.0.9",
+    "typescript": "^4.4.2"
   },
   "scripts": {
     "build": "tsc",

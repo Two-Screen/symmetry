@@ -21,7 +21,7 @@ const iop = (
   }
 };
 
-tap.test("diff with no change", t => {
+tap.test("diff with no change", (t) => {
   iop(t, null, null, "none", "diff nulls");
   iop(t, true, true, "none", "diff booleans");
   iop(t, 3.7, 3.7, "none", "diff numbers");
@@ -31,7 +31,7 @@ tap.test("diff with no change", t => {
   t.end();
 });
 
-tap.test("diff same type with nothing in common", t => {
+tap.test("diff same type with nothing in common", (t) => {
   iop(t, true, false, "reset", "diff booleans");
   iop(t, 3.7, 5.2, "reset", "diff numbers");
   iop(t, "foo", "bar", "reset", "diff strings");
@@ -40,7 +40,7 @@ tap.test("diff same type with nothing in common", t => {
   t.end();
 });
 
-tap.test("diff different types, with nothing in common", t => {
+tap.test("diff different types, with nothing in common", (t) => {
   iop(t, null, true, "reset", "null vs boolean");
   iop(t, false, 4.8, "reset", "boolean vs number");
   iop(t, 3.7, "foo", "reset", "number vs string");
@@ -49,7 +49,7 @@ tap.test("diff different types, with nothing in common", t => {
   t.end();
 });
 
-tap.test("diff different types, with vaguely similar values", t => {
+tap.test("diff different types, with vaguely similar values", (t) => {
   iop(t, null, false, "reset", "null vs false");
   iop(t, null, 0, "reset", "null vs zero");
   iop(t, null, "", "reset", "null vs empty string");
@@ -62,7 +62,7 @@ tap.test("diff different types, with vaguely similar values", t => {
   t.end();
 });
 
-tap.test("object diffs", t => {
+tap.test("object diffs", (t) => {
   iop(
     t,
     { a: 3, b: 5 },
@@ -112,7 +112,7 @@ tap.test("object diffs", t => {
   t.end();
 });
 
-tap.test("array diffs", t => {
+tap.test("array diffs", (t) => {
   iop(
     t,
     [3, 5, 8],
@@ -183,7 +183,13 @@ tap.test("array diffs", t => {
     t,
     [2, 3, 4],
     [1, 2, 3, 4, 5],
-    { t: "a", s: [[3, 0, 5], [0, 0, 1]] },
+    {
+      t: "a",
+      s: [
+        [3, 0, 5],
+        [0, 0, 1],
+      ],
+    },
     "two slices"
   );
   iop(
@@ -227,11 +233,15 @@ tap.test("array diffs", t => {
   iop(
     t,
     [{ x: 1, y: 1 }],
-    [{ x: 1, y: 2 }, { x: 1, y: 3 }, { x: 1, y: 4 }],
+    [
+      { x: 1, y: 2 },
+      { x: 1, y: 3 },
+      { x: 1, y: 4 },
+    ],
     {
       t: "a",
       p: { 0: { t: "o", s: { y: 2 } } },
-      s: [[1, 0, { x: 1, y: 3 }, { x: 1, y: 4 }]]
+      s: [[1, 0, { x: 1, y: 3 }, { x: 1, y: 4 }]],
     },
     "all partial changes"
   );
@@ -244,9 +254,12 @@ tap.test("array diffs", t => {
       t: "a",
       p: {
         2: { t: "a", s: [[1, 1, 94]] },
-        7: { t: "a", s: [[1, 1, 910]] }
+        7: { t: "a", s: [[1, 1, 910]] },
       },
-      s: [[9, 2, 1213], [4, 2, 96, 97]]
+      s: [
+        [9, 2, 1213],
+        [4, 2, 96, 97],
+      ],
     },
     "mixed slices and patches"
   );
@@ -254,7 +267,7 @@ tap.test("array diffs", t => {
   t.end();
 });
 
-tap.test("undefined handling", t => {
+tap.test("undefined handling", (t) => {
   iop(t, null, undefined, "none", "null vs undefined");
 
   iop(
@@ -290,12 +303,12 @@ tap.test("undefined handling", t => {
   t.end();
 });
 
-tap.test("function handling", t => {
-  iop(t, function() {}, undefined, "none", "function vs null");
+tap.test("function handling", (t) => {
+  iop(t, function () {}, undefined, "none", "function vs null");
 
   iop(
     t,
-    { a: 3, b: function() {} },
+    { a: 3, b: function () {} },
     { a: 3 },
     "none",
     "treat attribute as if non-existant (left)"
@@ -303,14 +316,14 @@ tap.test("function handling", t => {
   iop(
     t,
     { a: 3 },
-    { a: 3, b: function() {} },
+    { a: 3, b: function () {} },
     "none",
     "treat attribute as if non-existant (right)"
   );
 
   iop(
     t,
-    [3, function() {}, 5],
+    [3, function () {}, 5],
     [3, null, 5],
     "none",
     "treat array item as if null (left)"
@@ -318,7 +331,7 @@ tap.test("function handling", t => {
   iop(
     t,
     [3, null, 5],
-    [3, function() {}, 5],
+    [3, function () {}, 5],
     "none",
     "treat array item as if null (right)"
   );
@@ -326,31 +339,31 @@ tap.test("function handling", t => {
   t.end();
 });
 
-tap.test("special number handling", t => {
+tap.test("special number handling", (t) => {
   iop(t, NaN, null, "none", "NaN vs null");
   iop(t, Infinity, null, "none", "Infinity vs null");
   iop(t, -Infinity, null, "none", "-Infinity vs null");
   t.end();
 });
 
-tap.test("using toJSON method", t => {
+tap.test("using toJSON method", (t) => {
   let val: any;
   t.plan(3);
 
   val = {};
-  val.toJSON = function() {
+  val.toJSON = function () {
     return "foo";
   };
   iop(t, val, "foo", "none", "toJSON on an object");
 
   val = [];
-  val.toJSON = function() {
+  val.toJSON = function () {
     return "foo";
   };
   iop(t, val, "foo", "none", "toJSON on an array");
 
-  val = function() {};
-  val.toJSON = function() {
+  val = function () {};
+  val.toJSON = function () {
     return "foo";
   };
   iop(t, val, "foo", "none", "toJSON on a function");
@@ -358,7 +371,7 @@ tap.test("using toJSON method", t => {
   t.end();
 });
 
-tap.test("patch is copy-on-write", t => {
+tap.test("patch is copy-on-write", (t) => {
   let patch: OuterPatch;
   let target, result;
 
@@ -385,7 +398,7 @@ tap.test("patch is copy-on-write", t => {
   t.end();
 });
 
-tap.test("examples", t => {
+tap.test("examples", (t) => {
   let patch: OuterPatch;
   let a, b, obj, before, after, expect, people;
 
@@ -409,7 +422,7 @@ tap.test("examples", t => {
 
   people = new Backbone.Collection([
     { id: 1, name: "John", age: 30 },
-    { id: 2, name: "Dave", age: 34 }
+    { id: 2, name: "Dave", age: 34 },
   ]);
 
   before = people.toJSON();
@@ -419,7 +432,7 @@ tap.test("examples", t => {
   expect = {
     t: "a",
     p: { 1: { t: "o", s: { age: 35 } } },
-    s: [[2, 0, { id: 3, name: "Mark", age: 27 }]]
+    s: [[2, 0, { id: 3, name: "Mark", age: 27 }]],
   };
   t.same(patch, expect, "toJSON diff");
 

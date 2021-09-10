@@ -5,7 +5,7 @@ import {
   PlainArray,
   Patch,
   ObjectPatch,
-  ArrayPatch
+  ArrayPatch,
 } from "./types";
 
 /// Apply a patch based on its type.
