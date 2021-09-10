@@ -29,7 +29,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "fmt": "prettier --write '*.{json,md}' 'src/**/*.ts'",
-    "test": "tap ./dist/tests/test.js",
+    "test": "tap --no-cov ./dist/tests/test.js",
     "prepare": "tsc"
   }
 }
