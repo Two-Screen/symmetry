@@ -52,6 +52,28 @@ Install using NPM:
 npm install symmetry
 ```
 
+### Patch format
+
+Patches are one of two types of object, identified by the `t` field.
+
+Object patches have `"t": "o"`, and additional fields:
+
+- `r` for 'remove', with a list of target properties to remove.
+- `s` for 'set', with an object mapping target properties to values.
+- `p` for 'patch', with an object mapping target properties to subpatches.
+
+Array patches have `"t": "a"`, and additional fields:
+
+- `p` for 'patch', with an object mapping target indices to subpatches.
+- `s` for 'splice', with a list of argument lists for the array `splice` method
+  to apply in order. Must be applied after `p`.
+
+In addition, `createPatch` may return the special strings:
+
+- `"reset"` if no patch is possible between the two values, or they differ
+  enough that a patch isn't useful.
+- `"none"` if the two values were identical and no patching is necessary.
+
 ### Hacking the code
 
 ```bash
