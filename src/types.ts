@@ -20,9 +20,11 @@ export type ObjectPatchSet<T> = Partial<PlainObject<T>>;
 /** Type of property patches in `ObjectPatch`. */
 export type ObjectPatchNested<T> = { [K in keyof T]?: TypedPatch<T[K]> };
 
-/** Patch operation on an object. */
-///
-/** The property order here matches the order in which the patch is applied. */
+/**
+ * Patch operation on an object.
+ *
+ * The property order here matches the order in which the patch is applied.
+ */
 export interface ObjectPatch<T> {
   /** Type indicator. */
   t: "o";
@@ -39,9 +41,11 @@ export type ArrayPatchNested<T> = { [idx: number]: TypedPatch<ArrayValue<T>> };
 /** Type of splices in `ArrayPatch`. */
 export type ArrayPatchSplice<T> = ArraySplice<T>[];
 
-/** Patch operation on an array. */
-///
-/** The property order here matches the order in which the patch is applied. */
+/**
+ * Patch operation on an array.
+ *
+ * The property order here matches the order in which the patch is applied.
+ */
 export interface ArrayPatch<T> {
   /** Type indicator. */
   t: "a";
