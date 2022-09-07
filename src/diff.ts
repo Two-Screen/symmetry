@@ -14,13 +14,15 @@ import {
   OuterPatch,
 } from "./types";
 
-/// Fix up some JavaScript types and values that are not JSON.
-///
-/// This is not a 'deep' fix up, it only touches the immediate value. It's used
-/// mainly to ensure diffing checks don't have unexpected results.
-///
-/// This may still return undefined to signal the value is normally not
-/// serialized at all.
+/**
+ * Fix up some JavaScript types and values that are not JSON.
+ *
+ * This is not a 'deep' fix up, it only touches the immediate value. It's used
+ * mainly to ensure diffing checks don't have unexpected results.
+ *
+ * This may still return undefined to signal the value is normally not
+ * serialized at all.
+ */
 const normalizeJson = (val: any): any => {
   if (val instanceof Object) {
     // Call the `toJSON` method if it exists.
@@ -42,17 +44,18 @@ const normalizeJson = (val: any): any => {
   return val;
 };
 
-/// Diff any two values.
-///
-/// This is an untyped variant. If you know the value's type, you should use
-/// `createObjectPatch` or `createArrayPatch` instead.
+/**
+ * Create a patch for changes between two values from `left` to `right`.
+ *
+ * This is an untyped variant. If you know the value's type, you should use
+ * `createObjectPatch` or `createArrayPatch` instead.
+ */
 export const createPatch = (left: any, right: any): OuterPatch => {
   left = normalizeJson(left);
   right = normalizeJson(right);
   return createPatchNormalized(left, right);
 };
 
-/// Diff any two values, already normalized.
 const createPatchNormalized = (left: any, right: any): OuterPatch => {
   // Treat undefined as null.
   if (left === undefined) {
@@ -86,7 +89,9 @@ const createPatchNormalized = (left: any, right: any): OuterPatch => {
   return "reset";
 };
 
-/// Diff two objects.
+/**
+ * Create a patch for changes between two objects from `left` to `right`.
+ */
 export const createObjectPatch = <T extends AnyObject>(
   left: T,
   right: T
@@ -168,7 +173,9 @@ export const createObjectPatch = <T extends AnyObject>(
   }
 };
 
-// Compare two arrays.
+/**
+ * Create a patch for changes between two arrays from `left` to `right`.
+ */
 export const createArrayPatch = <T extends AnyArray>(
   left: T,
   right: T
