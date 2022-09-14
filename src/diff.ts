@@ -369,6 +369,11 @@ export const createArrayPatch = <T extends AnyArray>(
     }
   }
 
+  // If we splice the entire array, return a reset.
+  if (s.length === 1 && s[0][0] === 0 && s[0][1] === lenLeft) {
+    return "reset";
+  }
+
   // Build the patch object.
   const res: ArrayPatch<T> = { t: "a" };
   if (havePatches) {

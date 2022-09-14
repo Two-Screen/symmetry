@@ -264,6 +264,8 @@ tap.test("array diffs", (t) => {
     "mixed slices and patches"
   );
 
+  iop(t, [1, 2, 3], [4, 5, 6], "reset", "complete change of content");
+
   t.end();
 });
 
