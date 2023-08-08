@@ -9,7 +9,7 @@ declare let y: any;
 
 const suite = new Suite();
 
-const setup = () => {
+function setup() {
   // Some slightly complicated differing values.
   const dummies = () => {
     return {
@@ -27,9 +27,9 @@ const setup = () => {
   // Two copies to trigger full comparison.
   x = dummies();
   y = dummies();
-};
+}
 
-const onComplete = (event: Event): void => {
+function onComplete(event: Event): void {
   // Format result somewhat like jsperf.
   const bench = <Benchmark>event.currentTarget;
   if (bench.error) {
@@ -47,11 +47,11 @@ const onComplete = (event: Event): void => {
         " %)"
     );
   }
-};
+}
 
-const add = (name: string, fn: () => void): void => {
+function add(name: string, fn: () => void): void {
   suite.add(name, fn, { setup, onComplete });
-};
+}
 
 // Some patches and sets, on simple object.
 add("various object changes", () => {

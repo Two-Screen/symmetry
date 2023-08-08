@@ -54,7 +54,7 @@ npm install symmetry
 
 ### Patch format
 
-Patches are one of two types of object, identified by the `t` field.
+Patches are one of three types of object, identified by the `t` field.
 
 Object patches have `"t": "o"`, and additional fields:
 
@@ -68,11 +68,13 @@ Array patches have `"t": "a"`, and additional fields:
 - `s` for 'splice', with a list of argument lists for the array `splice` method
   to apply in order. Must be applied after `p`.
 
-In addition, `createPatch` may return the special strings:
+Reset patches have `"t": "r"`, and additional fields:
 
-- `"reset"` if no patch is possible between the two values, or they differ
-  enough that a patch isn't useful.
-- `"none"` if the two values were identical and no patching is necessary.
+- `v` for 'value', containing the new value in full.
+
+Reset patches occur when two values differ enough to make a patch not useful.
+
+Finally, a patch may also be `null` to indicate no change.
 
 ### Hacking the code
 

@@ -2,63 +2,73 @@
 
 import tap, { Test } from "tap";
 import Backbone from "backbone";
-import { OuterPatch, createPatch, applyPatch } from "../";
+import { Patch, createPatch, applyPatch } from "../";
+
+function identical(t: Test, found: any, wanted: any, descr: string): void {
+  if (Object.is(found, wanted)) {
+    return t.pass(descr);
+  } else {
+    return t.fail(descr, { found, wanted, note: "object identities differ" });
+  }
+}
 
 // Verify all of a given input, output and patch.
-const iop = (
+function iop<A, B>(
   t: Test,
-  input: any,
-  output: any,
-  patch: OuterPatch,
+  input: A,
+  output: B,
+  patch: Patch<A | B>,
   message: string
-): void => {
-  const result = createPatch(input, output);
-  t.same(result, patch, `${message} (verify diff)`);
+): void {
+  const createResult = createPatch<A | B>(input, output);
+  t.same(createResult, patch, `${message} (verify diff)`);
 
-  if (typeof patch === "object") {
-    const result = applyPatch(input, patch);
-    t.same(result, output, `${message} (verify patch)`);
+  const applyResult = applyPatch(input, patch);
+  if (createResult) {
+    t.same(applyResult, output, `${message} (verify patch)`);
+  } else {
+    identical(t, applyResult, input, `${message} (verify patch)`);
   }
-};
+}
 
 tap.test("diff with no change", (t) => {
-  iop(t, null, null, "none", "diff nulls");
-  iop(t, true, true, "none", "diff booleans");
-  iop(t, 3.7, 3.7, "none", "diff numbers");
-  iop(t, "foo", "foo", "none", "diff strings");
-  iop(t, { a: 3 }, { a: 3 }, "none", "diff objects");
-  iop(t, [8, 9], [8, 9], "none", "diff arrays");
+  iop(t, null, null, null, "diff nulls");
+  iop(t, true, true, null, "diff booleans");
+  iop(t, 3.7, 3.7, null, "diff numbers");
+  iop(t, "foo", "foo", null, "diff strings");
+  iop(t, { a: 3 }, { a: 3 }, null, "diff objects");
+  iop(t, [8, 9], [8, 9], null, "diff arrays");
   t.end();
 });
 
 tap.test("diff same type with nothing in common", (t) => {
-  iop(t, true, false, "reset", "diff booleans");
-  iop(t, 3.7, 5.2, "reset", "diff numbers");
-  iop(t, "foo", "bar", "reset", "diff strings");
-  iop(t, { a: 3 }, { c: 8 }, "reset", "diff objects");
-  iop(t, [1, 2], [8, 9], "reset", "diff arrays");
+  iop(t, true, false, { t: "r", v: false }, "diff booleans");
+  iop(t, 3.7, 5.2, { t: "r", v: 5.2 }, "diff numbers");
+  iop(t, "foo", "bar", { t: "r", v: "bar" }, "diff strings");
+  iop(t, { a: 3 }, { c: 8 }, { t: "r", v: { c: 8 } }, "diff objects");
+  iop(t, [1, 2], [8, 9], { t: "r", v: [8, 9] }, "diff arrays");
   t.end();
 });
 
 tap.test("diff different types, with nothing in common", (t) => {
-  iop(t, null, true, "reset", "null vs boolean");
-  iop(t, false, 4.8, "reset", "boolean vs number");
-  iop(t, 3.7, "foo", "reset", "number vs string");
-  iop(t, "bar", { d: 9 }, "reset", "string vs object");
-  iop(t, { a: 3 }, [5, 6], "reset", "object vs array");
+  iop(t, null, true, { t: "r", v: true }, "null vs boolean");
+  iop(t, false, 4.8, { t: "r", v: 4.8 }, "boolean vs number");
+  iop(t, 3.7, "foo", { t: "r", v: "foo" }, "number vs string");
+  iop(t, "bar", { d: 9 }, { t: "r", v: { d: 9 } }, "string vs object");
+  iop(t, { a: 3 }, [5, 6], { t: "r", v: [5, 6] }, "object vs array");
   t.end();
 });
 
 tap.test("diff different types, with vaguely similar values", (t) => {
-  iop(t, null, false, "reset", "null vs false");
-  iop(t, null, 0, "reset", "null vs zero");
-  iop(t, null, "", "reset", "null vs empty string");
-  iop(t, false, 0, "reset", "false vs zero");
-  iop(t, false, "", "reset", "false vs empty string");
-  iop(t, 0, "", "reset", "zero vs empty string");
-  iop(t, 0, "0", "reset", "zero vs string zero");
-  iop(t, {}, [], "reset", "empty object vs empty array");
-  iop(t, { length: 0 }, [], "reset", "fake array vs empty array");
+  iop(t, null, false, { t: "r", v: false }, "null vs false");
+  iop(t, null, 0, { t: "r", v: 0 }, "null vs zero");
+  iop(t, null, "", { t: "r", v: "" }, "null vs empty string");
+  iop(t, false, 0, { t: "r", v: 0 }, "false vs zero");
+  iop(t, false, "", { t: "r", v: "" }, "false vs empty string");
+  iop(t, 0, "", { t: "r", v: "" }, "zero vs empty string");
+  iop(t, 0, "0", { t: "r", v: "0" }, "zero vs string zero");
+  iop(t, {}, [], { t: "r", v: [] }, "empty object vs empty array");
+  iop(t, { length: 0 }, [], { t: "r", v: [] }, "fake array vs empty array");
   t.end();
 });
 
@@ -77,7 +87,13 @@ tap.test("object diffs", (t) => {
     { t: "o", s: { c: 8 } },
     "add an attribute"
   );
-  iop(t, { a: 3, b: 5 }, { a: 3 }, { t: "o", r: ["b"] }, "remove an attribute");
+  iop(
+    t,
+    { a: 3, b: 5 },
+    { a: 3 },
+    { t: "o", r: ["b"] as any },
+    "remove an attribute"
+  );
 
   iop(
     t,
@@ -264,26 +280,32 @@ tap.test("array diffs", (t) => {
     "mixed slices and patches"
   );
 
-  iop(t, [1, 2, 3], [4, 5, 6], "reset", "complete change of content");
+  iop(
+    t,
+    [1, 2, 3],
+    [4, 5, 6],
+    { t: "r", v: [4, 5, 6] },
+    "complete change of content"
+  );
 
   t.end();
 });
 
 tap.test("undefined handling", (t) => {
-  iop(t, null, undefined, "none", "null vs undefined");
+  iop(t, null, undefined, null, "null vs undefined");
 
   iop(
     t,
     { a: 3, b: undefined },
     { a: 3 },
-    "none",
+    null,
     "treat attribute as if non-existant (left)"
   );
   iop(
     t,
     { a: 3 },
     { a: 3, b: undefined },
-    "none",
+    null,
     "treat attribute as if non-existant (right)"
   );
 
@@ -291,14 +313,14 @@ tap.test("undefined handling", (t) => {
     t,
     [3, undefined, 5],
     [3, null, 5],
-    "none",
+    null,
     "treat array item as if null (left)"
   );
   iop(
     t,
     [3, null, 5],
     [3, undefined, 5],
-    "none",
+    null,
     "treat array item as if null (right)"
   );
 
@@ -306,20 +328,20 @@ tap.test("undefined handling", (t) => {
 });
 
 tap.test("function handling", (t) => {
-  iop(t, function () {}, undefined, "none", "function vs null");
+  iop(t, function () {}, undefined, null, "function vs null");
 
   iop(
     t,
     { a: 3, b: function () {} },
     { a: 3 },
-    "none",
+    null,
     "treat attribute as if non-existant (left)"
   );
   iop(
     t,
     { a: 3 },
     { a: 3, b: function () {} },
-    "none",
+    null,
     "treat attribute as if non-existant (right)"
   );
 
@@ -327,14 +349,14 @@ tap.test("function handling", (t) => {
     t,
     [3, function () {}, 5],
     [3, null, 5],
-    "none",
+    null,
     "treat array item as if null (left)"
   );
   iop(
     t,
     [3, null, 5],
     [3, function () {}, 5],
-    "none",
+    null,
     "treat array item as if null (right)"
   );
 
@@ -342,39 +364,39 @@ tap.test("function handling", (t) => {
 });
 
 tap.test("special number handling", (t) => {
-  iop(t, NaN, null, "none", "NaN vs null");
-  iop(t, Infinity, null, "none", "Infinity vs null");
-  iop(t, -Infinity, null, "none", "-Infinity vs null");
+  iop(t, NaN, null, null, "NaN vs null");
+  iop(t, Infinity, null, null, "Infinity vs null");
+  iop(t, -Infinity, null, null, "-Infinity vs null");
   t.end();
 });
 
 tap.test("using toJSON method", (t) => {
   let val: any;
-  t.plan(3);
+  t.plan(6);
 
   val = {};
   val.toJSON = function () {
     return "foo";
   };
-  iop(t, val, "foo", "none", "toJSON on an object");
+  iop(t, val, "foo", null, "toJSON on an object");
 
   val = [];
   val.toJSON = function () {
     return "foo";
   };
-  iop(t, val, "foo", "none", "toJSON on an array");
+  iop(t, val, "foo", null, "toJSON on an array");
 
   val = function () {};
   val.toJSON = function () {
     return "foo";
   };
-  iop(t, val, "foo", "none", "toJSON on a function");
+  iop(t, val, "foo", null, "toJSON on a function");
 
   t.end();
 });
 
 tap.test("patch is copy-on-write", (t) => {
-  let patch: OuterPatch;
+  let patch: Patch<any>;
   let target, result;
 
   target = { one: { x: 3 }, two: { x: 5 } };
@@ -401,7 +423,7 @@ tap.test("patch is copy-on-write", (t) => {
 });
 
 tap.test("examples", (t) => {
-  let patch: OuterPatch;
+  let patch: Patch<any>;
   let a, b, obj, before, after, expect, people;
 
   a = { x: 3, y: 5, z: 1 };

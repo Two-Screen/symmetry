@@ -9,9 +9,10 @@ import {
   ArrayPatchNested,
   ArrayPatchSplice,
   ArrayPatch,
-  OuterObjectPatch,
-  OuterArrayPatch,
-  OuterPatch,
+  Patch,
+  CreateObjectPatchResult,
+  CreateArrayPatchResult,
+  ArrayValue,
 } from "./types";
 
 /**
@@ -23,7 +24,7 @@ import {
  * This may still return undefined to signal the value is normally not
  * serialized at all.
  */
-const normalizeJson = (val: any): any => {
+function normalizeJson(val: any): any {
   if (val instanceof Object) {
     // Call the `toJSON` method if it exists.
     if (typeof val.toJSON === "function") {
@@ -42,7 +43,7 @@ const normalizeJson = (val: any): any => {
   }
 
   return val;
-};
+}
 
 /**
  * Create a patch for changes between two values from `left` to `right`.
@@ -50,13 +51,13 @@ const normalizeJson = (val: any): any => {
  * This is an untyped variant. If you know the value's type, you should use
  * `createObjectPatch` or `createArrayPatch` instead.
  */
-export const createPatch = (left: any, right: any): OuterPatch => {
+export function createPatch<T>(left: T, right: T): Patch<T> {
   left = normalizeJson(left);
   right = normalizeJson(right);
   return createPatchNormalized(left, right);
-};
+}
 
-const createPatchNormalized = (left: any, right: any): OuterPatch => {
+function createPatchNormalized(left: any, right: any): Patch<any> {
   // Treat undefined as null.
   if (left === undefined) {
     left = null;
@@ -67,7 +68,7 @@ const createPatchNormalized = (left: any, right: any): OuterPatch => {
 
   // Identical, don't even need to descend.
   if (left === right) {
-    return "none";
+    return null;
   }
 
   const leftIsObject = typeof left === "object" && left !== null;
@@ -86,16 +87,16 @@ const createPatchNormalized = (left: any, right: any): OuterPatch => {
   }
 
   // Reset everything else.
-  return "reset";
-};
+  return { t: "r", v: right };
+}
 
 /**
  * Create a patch for changes between two objects from `left` to `right`.
  */
-export const createObjectPatch = <T extends AnyObject>(
+export function createObjectPatch<T extends AnyObject>(
   left: T,
   right: T
-): OuterObjectPatch<T> => {
+): CreateObjectPatchResult<T> {
   const r: ObjectPatchRemove<T> = [];
   const s: ObjectPatchSet<T> = {};
   const p: ObjectPatchNested<T> = {};
@@ -121,18 +122,20 @@ export const createObjectPatch = <T extends AnyObject>(
 
     // Diff and merge the resulting patch.
     const patch = createPatchNormalized(valLeft, valRight);
-    if (patch === "reset") {
-      s[key] = valRight;
-      numSets += 1;
-    } else if (patch !== "none") {
-      p[key] = patch;
-      numPatches += 1;
+    if (patch) {
+      if (patch.t === "r") {
+        s[key] = patch.v;
+        numSets += 1;
+      } else {
+        p[key] = patch;
+        numPatches += 1;
+      }
     }
   }
 
   // No partial changes, tell parent we should be reset.
   if (numAttrs && r.length + numSets === numAttrs) {
-    return "reset";
+    return { t: "r", v: right };
   }
 
   // Find new properties.
@@ -144,7 +147,7 @@ export const createObjectPatch = <T extends AnyObject>(
 
     // Attributes was added to an empty object.
     if (numAttrs === 0) {
-      return "reset";
+      return { t: "r", v: right };
     }
 
     // Attribute was added.
@@ -167,31 +170,32 @@ export const createObjectPatch = <T extends AnyObject>(
     res.p = p;
   }
   if (!res.r && !res.s && !res.p) {
-    return "none";
+    return null;
   } else {
     return res;
   }
-};
+}
 
 /**
  * Create a patch for changes between two arrays from `left` to `right`.
  */
-export const createArrayPatch = <T extends AnyArray>(
+export function createArrayPatch<T extends AnyArray>(
   left: T,
   right: T
-): OuterArrayPatch<T> => {
+): CreateArrayPatchResult<T> {
   const lenLeft = left.length;
   const lenRight = right.length;
   let valLeft, valRight, idx;
 
   // Reduce the problem by trimming exact matches at the start.
-  let start, firstDiff;
+  let start: number;
+  let firstDiff: Patch<ArrayValue<T>> = null;
   for (start = 0; start < lenLeft && start < lenRight; start += 1) {
     const valLeft = normalizeJson(left[start]);
     const valRight = normalizeJson(right[start]);
 
     firstDiff = createPatchNormalized(valLeft, valRight);
-    if (firstDiff !== "none") {
+    if (firstDiff) {
       break;
     }
   }
@@ -199,7 +203,7 @@ export const createArrayPatch = <T extends AnyArray>(
   // Short-circuit for exact matches, pushes and pops.
   if (start === lenLeft) {
     if (start === lenRight) {
-      return "none";
+      return null;
     }
 
     const splice: ArraySplice<T> = [
@@ -216,13 +220,13 @@ export const createArrayPatch = <T extends AnyArray>(
   // Reduce further by trimming exact matches at the end.
   let endLeft = lenLeft - 1;
   let endRight = lenRight - 1;
-  let lastDiff;
+  let lastDiff: Patch<ArrayValue<T>> = null;
   while (endLeft >= start && endRight >= start) {
     valLeft = normalizeJson(left[endLeft]);
     valRight = normalizeJson(right[endRight]);
 
     lastDiff = createPatchNormalized(valLeft, valRight);
-    if (lastDiff !== "none") {
+    if (lastDiff) {
       break;
     }
 
@@ -251,7 +255,7 @@ export const createArrayPatch = <T extends AnyArray>(
   const size = width * height;
   const diag = width + 1;
 
-  const diffs = new Array(size);
+  const diffs: { [idx: number]: Patch<ArrayValue<T>> } = new Array(size);
   diffs[0] = firstDiff;
   diffs[size - 1] = lastDiff;
 
@@ -279,7 +283,7 @@ export const createArrayPatch = <T extends AnyArray>(
           diff = diffs[idx] = createPatchNormalized(valLeft, valRight);
         }
 
-        if (diff === "reset") {
+        if (diff?.t === "r") {
           break;
         }
 
@@ -304,7 +308,7 @@ export const createArrayPatch = <T extends AnyArray>(
   if (d === size) {
     if (start === 0 && width === lenLeft) {
       // If we splice the entire array, return a reset.
-      return "reset";
+      return { t: "r", v: right };
     } else {
       // If we have no diagonals, we can optimize.
       s.push([start, width, ...right.slice(start, endRight + 1)]);
@@ -352,10 +356,10 @@ export const createArrayPatch = <T extends AnyArray>(
       idx = y * width + x;
       while (idx < size && x < width && y < height) {
         diff = diffs[idx];
-        if (diff === "reset") {
+        if (diff?.t === "r") {
           break;
         }
-        if (diff !== "none") {
+        if (diff) {
           p[start + x] = diff;
           havePatches = true;
         }
@@ -371,7 +375,7 @@ export const createArrayPatch = <T extends AnyArray>(
 
   // If we splice the entire array, return a reset.
   if (s.length === 1 && s[0][0] === 0 && s[0][1] === lenLeft) {
-    return "reset";
+    return { t: "r", v: right };
   }
 
   // Build the patch object.
@@ -383,4 +387,4 @@ export const createArrayPatch = <T extends AnyArray>(
     res.s = s;
   }
   return res;
-};
+}
