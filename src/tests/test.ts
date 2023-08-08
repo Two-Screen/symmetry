@@ -18,7 +18,7 @@ function iop<A, B>(
   input: A,
   output: B,
   patch: Patch<A | B>,
-  message: string
+  message: string,
 ): void {
   const createResult = createPatch<A | B>(input, output);
   t.same(createResult, patch, `${message} (verify diff)`);
@@ -78,21 +78,21 @@ tap.test("object diffs", (t) => {
     { a: 3, b: 5 },
     { a: 3, b: 8 },
     { t: "o", s: { b: 8 } },
-    "change an attribute"
+    "change an attribute",
   );
   iop(
     t,
     { a: 3, b: 5 },
     { a: 3, b: 5, c: 8 },
     { t: "o", s: { c: 8 } },
-    "add an attribute"
+    "add an attribute",
   );
   iop(
     t,
     { a: 3, b: 5 },
     { a: 3 },
     { t: "o", r: ["b"] as any },
-    "remove an attribute"
+    "remove an attribute",
   );
 
   iop(
@@ -100,14 +100,14 @@ tap.test("object diffs", (t) => {
     { a: 3, b: { x: 5, y: 8 } },
     { a: 3, b: { x: 5, y: 11 } },
     { t: "o", p: { b: { t: "o", s: { y: 11 } } } },
-    "partial change of an object attribute"
+    "partial change of an object attribute",
   );
   iop(
     t,
     { a: 3, b: { x: 5, y: 8 } },
     { a: 3, b: { x: 7, y: 11 } },
     { t: "o", s: { b: { x: 7, y: 11 } } },
-    "complete change of an object attribute"
+    "complete change of an object attribute",
   );
 
   iop(
@@ -115,14 +115,14 @@ tap.test("object diffs", (t) => {
     { a: 3, b: [5, 8] },
     { a: 3, b: [5, 11] },
     { t: "o", p: { b: { t: "a", s: [[1, 1, 11]] } } },
-    "partial change of an array attribute"
+    "partial change of an array attribute",
   );
   iop(
     t,
     { a: 3, b: [5, 8] },
     { a: 3, b: [7, 11] },
     { t: "o", s: { b: [7, 11] } },
-    "complete change of an array attribute"
+    "complete change of an array attribute",
   );
 
   t.end();
@@ -134,21 +134,21 @@ tap.test("array diffs", (t) => {
     [3, 5, 8],
     [4, 5, 8],
     { t: "a", s: [[0, 1, 4]] },
-    "change an item at the start"
+    "change an item at the start",
   );
   iop(
     t,
     [5, 8],
     [3, 5, 8],
     { t: "a", s: [[0, 0, 3]] },
-    "insert an item at the start"
+    "insert an item at the start",
   );
   iop(
     t,
     [3, 5, 8],
     [5, 8],
     { t: "a", s: [[0, 1]] },
-    "remove an item from the start"
+    "remove an item from the start",
   );
 
   iop(
@@ -156,21 +156,21 @@ tap.test("array diffs", (t) => {
     [3, 5, 8],
     [3, 6, 8],
     { t: "a", s: [[1, 1, 6]] },
-    "change an item in the middle"
+    "change an item in the middle",
   );
   iop(
     t,
     [3, 8],
     [3, 5, 8],
     { t: "a", s: [[1, 0, 5]] },
-    "insert an item in the middle"
+    "insert an item in the middle",
   );
   iop(
     t,
     [3, 5, 8],
     [3, 8],
     { t: "a", s: [[1, 1]] },
-    "remove an item from the middle"
+    "remove an item from the middle",
   );
 
   iop(
@@ -178,21 +178,21 @@ tap.test("array diffs", (t) => {
     [3, 5, 8],
     [3, 5, 9],
     { t: "a", s: [[2, 1, 9]] },
-    "change an item at the end"
+    "change an item at the end",
   );
   iop(
     t,
     [3, 5],
     [3, 5, 8],
     { t: "a", s: [[2, 0, 8]] },
-    "insert an item at the end"
+    "insert an item at the end",
   );
   iop(
     t,
     [3, 5, 8],
     [3, 5],
     { t: "a", s: [[2, 1]] },
-    "remove an item from the end"
+    "remove an item from the end",
   );
 
   iop(
@@ -206,14 +206,14 @@ tap.test("array diffs", (t) => {
         [0, 0, 1],
       ],
     },
-    "two slices"
+    "two slices",
   );
   iop(
     t,
     [1, 2, 3, 4, 5, 6, 7],
     [1, 2, 13, 14, 15, 16, 7],
     { t: "a", s: [[2, 4, 13, 14, 15, 16]] },
-    "large slice"
+    "large slice",
   );
 
   iop(
@@ -221,14 +221,14 @@ tap.test("array diffs", (t) => {
     [3, [5, 8]],
     [3, [5, 11]],
     { t: "a", p: { 1: { t: "a", s: [[1, 1, 11]] } } },
-    "partial change of an array item"
+    "partial change of an array item",
   );
   iop(
     t,
     [3, [5, 8]],
     [3, [7, 11]],
     { t: "a", s: [[1, 1, [7, 11]]] },
-    "complete change of an array item"
+    "complete change of an array item",
   );
 
   iop(
@@ -236,14 +236,14 @@ tap.test("array diffs", (t) => {
     [3, { x: 5, y: 8 }],
     [3, { x: 5, y: 11 }],
     { t: "a", p: { 1: { t: "o", s: { y: 11 } } } },
-    "partial change of an object item"
+    "partial change of an object item",
   );
   iop(
     t,
     [3, { x: 5, y: 8 }],
     [3, { x: 7, y: 11 }],
     { t: "a", s: [[1, 1, { x: 7, y: 11 }]] },
-    "complete change of an object item"
+    "complete change of an object item",
   );
 
   iop(
@@ -259,7 +259,7 @@ tap.test("array diffs", (t) => {
       p: { 0: { t: "o", s: { y: 2 } } },
       s: [[1, 0, { x: 1, y: 3 }, { x: 1, y: 4 }]],
     },
-    "all partial changes"
+    "all partial changes",
   );
 
   iop(
@@ -277,7 +277,7 @@ tap.test("array diffs", (t) => {
         [4, 2, 96, 97],
       ],
     },
-    "mixed slices and patches"
+    "mixed slices and patches",
   );
 
   iop(
@@ -285,7 +285,7 @@ tap.test("array diffs", (t) => {
     [1, 2, 3],
     [4, 5, 6],
     { t: "r", v: [4, 5, 6] },
-    "complete change of content"
+    "complete change of content",
   );
 
   t.end();
@@ -299,14 +299,14 @@ tap.test("undefined handling", (t) => {
     { a: 3, b: undefined },
     { a: 3 },
     null,
-    "treat attribute as if non-existant (left)"
+    "treat attribute as if non-existant (left)",
   );
   iop(
     t,
     { a: 3 },
     { a: 3, b: undefined },
     null,
-    "treat attribute as if non-existant (right)"
+    "treat attribute as if non-existant (right)",
   );
 
   iop(
@@ -314,14 +314,14 @@ tap.test("undefined handling", (t) => {
     [3, undefined, 5],
     [3, null, 5],
     null,
-    "treat array item as if null (left)"
+    "treat array item as if null (left)",
   );
   iop(
     t,
     [3, null, 5],
     [3, undefined, 5],
     null,
-    "treat array item as if null (right)"
+    "treat array item as if null (right)",
   );
 
   t.end();
@@ -335,14 +335,14 @@ tap.test("function handling", (t) => {
     { a: 3, b: function () {} },
     { a: 3 },
     null,
-    "treat attribute as if non-existant (left)"
+    "treat attribute as if non-existant (left)",
   );
   iop(
     t,
     { a: 3 },
     { a: 3, b: function () {} },
     null,
-    "treat attribute as if non-existant (right)"
+    "treat attribute as if non-existant (right)",
   );
 
   iop(
@@ -350,14 +350,14 @@ tap.test("function handling", (t) => {
     [3, function () {}, 5],
     [3, null, 5],
     null,
-    "treat array item as if null (left)"
+    "treat array item as if null (left)",
   );
   iop(
     t,
     [3, null, 5],
     [3, function () {}, 5],
     null,
-    "treat array item as if null (right)"
+    "treat array item as if null (right)",
   );
 
   t.end();

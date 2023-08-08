@@ -95,7 +95,7 @@ function createPatchNormalized(left: any, right: any): Patch<any> {
  */
 export function createObjectPatch<T extends AnyObject>(
   left: T,
-  right: T
+  right: T,
 ): CreateObjectPatchResult<T> {
   const r: ObjectPatchRemove<T> = [];
   const s: ObjectPatchSet<T> = {};
@@ -181,7 +181,7 @@ export function createObjectPatch<T extends AnyObject>(
  */
 export function createArrayPatch<T extends AnyArray>(
   left: T,
-  right: T
+  right: T,
 ): CreateArrayPatchResult<T> {
   const lenLeft = left.length;
   const lenRight = right.length;

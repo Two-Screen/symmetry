@@ -44,7 +44,7 @@ function onComplete(event: Event): void {
         " ops/sec " +
         "(± " +
         bench.stats.rme.toFixed(2) +
-        " %)"
+        " %)",
     );
   }
 }
@@ -57,7 +57,7 @@ function add(name: string, fn: () => void): void {
 add("various object changes", () => {
   Symmetry.createObjectPatch(
     { a: x.v1, b: x.v2, c: x.v3, d: x.v4, e: x.v5, f: x.v6 },
-    { a: y.v1, b: y.v7, c: y.v3, d: y.v8, e: y.v7, f: y.v6 }
+    { a: y.v1, b: y.v7, c: y.v3, d: y.v8, e: y.v7, f: y.v6 },
   );
 });
 
@@ -65,7 +65,7 @@ add("various object changes", () => {
 add("various array changes", () => {
   Symmetry.createArrayPatch(
     [x.v1, x.v2, x.v3, x.v4, x.v5, x.v6],
-    [y.v1, y.v7, y.v3, y.v8, y.v7, y.v7]
+    [y.v1, y.v7, y.v3, y.v8, y.v7, y.v7],
   );
 });
 
@@ -73,25 +73,25 @@ add("various array changes", () => {
 add("array push", () => {
   Symmetry.createArrayPatch(
     [x.v1, x.v2, x.v3, x.v4, x.v5, x.v6],
-    [y.v1, y.v2, y.v3, y.v4, y.v5, y.v6, y.v7]
+    [y.v1, y.v2, y.v3, y.v4, y.v5, y.v6, y.v7],
   );
 });
 add("array pop", () => {
   Symmetry.createArrayPatch(
     [x.v1, x.v2, x.v3, x.v4, x.v5, x.v6],
-    [y.v1, y.v2, y.v3, y.v4, y.v5]
+    [y.v1, y.v2, y.v3, y.v4, y.v5],
   );
 });
 add("array shift", () => {
   Symmetry.createArrayPatch(
     [x.v1, x.v2, x.v3, x.v4, x.v5, x.v6],
-    [y.v2, y.v3, y.v4, y.v5, y.v6]
+    [y.v2, y.v3, y.v4, y.v5, y.v6],
   );
 });
 add("array unshift", () => {
   Symmetry.createArrayPatch(
     [x.v1, x.v2, x.v3, x.v4, x.v5, x.v6],
-    [y.v8, y.v1, y.v2, y.v3, y.v4, y.v5, y.v6]
+    [y.v8, y.v1, y.v2, y.v3, y.v4, y.v5, y.v6],
   );
 });
 
@@ -99,7 +99,7 @@ add("array unshift", () => {
 add("array unshift & push", () => {
   Symmetry.createArrayPatch(
     [x.v7, x.v6, x.v5, x.v4, x.v3, x.v2, x.v1],
-    [y.v8, y.v7, y.v6, y.v5, y.v4, y.v3, y.v2]
+    [y.v8, y.v7, y.v6, y.v5, y.v4, y.v3, y.v2],
   );
 });
 

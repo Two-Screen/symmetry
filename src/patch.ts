@@ -60,7 +60,7 @@ function factory(inPlace = false) {
   /** Apply a patch created by `createObjectPatch`. */
   function applyObjectPatch<T extends AnyObject>(
     obj: T,
-    patch: CreateObjectPatchResult<T>
+    patch: CreateObjectPatchResult<T>,
   ): PlainObject<T> {
     if (!patch) {
       return obj;
@@ -76,7 +76,7 @@ function factory(inPlace = false) {
   /** Apply a patch created by `createArrayPatch`. */
   function applyArrayPatch<T extends AnyArray>(
     arr: T,
-    patch: CreateArrayPatchResult<T>
+    patch: CreateArrayPatchResult<T>,
   ): PlainArray<T> {
     if (!patch) {
       return arr;
@@ -104,7 +104,7 @@ function factory(inPlace = false) {
   /** Apply a nested object patch. */
   function applyObjectPatchNested<T extends AnyObject>(
     obj: T,
-    patch: ObjectPatch<T>
+    patch: ObjectPatch<T>,
   ): PlainObject<T> {
     let output = inPlace ? obj : { ...obj };
 
@@ -135,7 +135,7 @@ function factory(inPlace = false) {
   /** Apply a nested array patch. */
   function applyArrayPatchNested<T extends AnyArray>(
     arr: T,
-    patch: ArrayPatch<T>
+    patch: ArrayPatch<T>,
   ): PlainArray<T> {
     const output = inPlace ? arr : [...arr];
 

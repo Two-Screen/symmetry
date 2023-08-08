@@ -24,9 +24,9 @@
     "@types/node": "*",
     "backbone": "^1.4.0",
     "benchmark": "2.1.4",
-    "prettier": "^2.4.0",
+    "prettier": "^3.0.1",
     "tap": "^16.3.4",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "tsc",
