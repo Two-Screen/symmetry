@@ -33,7 +33,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "fmt": "prettier --write '*.{json,md}' 'src/**/*.ts'",
-    "test": "tap --no-cov ./dist/tests/test.js",
+    "test": "tap --allow-incomplete-coverage ./dist/tests/test.js",
     "prepare": "tsc"
   }
 }
