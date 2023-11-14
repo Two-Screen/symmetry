@@ -22,6 +22,7 @@
     "@types/backbone": "^1.4.1",
     "@types/benchmark": "^2.1.1",
     "@types/node": "*",
+    "@types/react": "^18.2.37",
     "backbone": "^1.4.0",
     "benchmark": "2.1.4",
     "prettier": "^3.0.1",
